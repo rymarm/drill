@@ -300,7 +300,7 @@
               <include>*:*</include>
             </includes>
             <excludes>
-              <exclude>com.dyuproject.protostuff:*</exclude>
+              <exclude>io.protostuff:*</exclude>
               <exclude>${calcite.groupId}:calcite-core</exclude>
               <exclude>${calcite.groupId}:calcite-linq4j</exclude>
               <exclude>org.pentaho:*</exclude>
@@ -617,7 +617,7 @@
                   </includes>
                   <excludes>
                     <exclude>org.slf4j:jcl-over-slf4j</exclude>
-                    <exclude>com.dyuproject.protostuff:*</exclude>
+                    <exclude>io.protostuff:*</exclude>
                     <exclude>${calcite.groupId}:calcite-core</exclude>
                     <exclude>${calcite.groupId}:calcite-linq4j</exclude>
                     <exclude>org.pentaho:*</exclude>
