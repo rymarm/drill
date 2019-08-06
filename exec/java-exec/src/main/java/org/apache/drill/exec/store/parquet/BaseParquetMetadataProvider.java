@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -368,26 +369,25 @@ public abstract class BaseParquetMetadataProvider implements ParquetMetadataProv
         return Collections.emptyMap();
       }
       boolean addRowGroups = false;
-      files = new LinkedHashMap<>();
       if (rowGroups == null) {
         rowGroups = LinkedListMultimap.create();
         addRowGroups = true;
       }
-      for (MetadataBase.ParquetFileMetadata file : parquetTableMetadata.getFiles()) {
-        int index = 0;
-        List<RowGroupMetadata> fileRowGroups = new ArrayList<>();
-        for (MetadataBase.RowGroupMetadata rowGroup : file.getRowGroups()) {
-          RowGroupMetadata rowGroupMetadata = ParquetTableMetadataUtils.getRowGroupMetadata(parquetTableMetadata, rowGroup, index++, file.getPath());
-          fileRowGroups.add(rowGroupMetadata);
 
-          if (addRowGroups) {
-            rowGroups.put(rowGroupMetadata.getLocation(), rowGroupMetadata);
-          }
-        }
+      Multimap<Path, RowGroupMetadata> rowGroupsMetadata = ParquetTableMetadataUtils.getRowGroupsMetadata(parquetTableMetadata);
 
-        FileMetadata fileMetadata = ParquetTableMetadataUtils.getFileMetadata(fileRowGroups, tableName, parquetTableMetadata);
-        files.put(fileMetadata.getLocation(), fileMetadata);
+      if (addRowGroups) {
+        rowGroups = rowGroupsMetadata;
       }
+
+      files = rowGroupsMetadata.asMap().values().stream()
+        .map(ParquetTableMetadataUtils::getFileMetadata)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toMap(
+          FileMetadata::getLocation,
+          Function.identity(),
+          (o, n) -> n,
+          LinkedHashMap::new));
     }
     return files;
   }

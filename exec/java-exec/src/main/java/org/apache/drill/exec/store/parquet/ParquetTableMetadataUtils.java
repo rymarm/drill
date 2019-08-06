@@ -45,6 +45,7 @@ import org.apache.drill.metastore.TableMetadata;
 import org.apache.drill.metastore.TableStatisticsKind;
 import org.apache.drill.exec.expr.ExactStatisticsConstants;
 import org.apache.drill.exec.expr.StatisticsProvider;
+import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableList;
 import org.apache.drill.shaded.guava.com.google.common.collect.ImmutableMap;
 import org.apache.drill.shaded.guava.com.google.common.collect.LinkedListMultimap;
@@ -121,6 +122,8 @@ public class ParquetTableMetadataUtils {
   /**
    * Returns list of {@link RowGroupMetadata} received by converting parquet row groups metadata
    * taken from the specified tableMetadata.
+   * Assigns index to row groups based on their position in files metadata.
+   * For empty / fake row groups assigns '-1' index.
    *
    * @param tableMetadata the source of row groups to be converted
    * @return list of {@link RowGroupMetadata}
@@ -130,7 +133,14 @@ public class ParquetTableMetadataUtils {
     for (MetadataBase.ParquetFileMetadata file : tableMetadata.getFiles()) {
       int index = 0;
       for (MetadataBase.RowGroupMetadata rowGroupMetadata : file.getRowGroups()) {
-        rowGroups.put(file.getPath(), getRowGroupMetadata(tableMetadata, rowGroupMetadata, index++, file.getPath()));
+        int newIndex;
+        if (rowGroupMetadata.isEmpty()) {
+          Preconditions.checkState(file.getRowGroups().size() == 1, "Only one empty / fake row group is allowed per file");
+          newIndex = -1;
+        } else {
+          newIndex = index++;
+        }
+        rowGroups.put(file.getPath(), getRowGroupMetadata(tableMetadata, rowGroupMetadata, newIndex, file.getPath()));
       }
     }
 
@@ -207,12 +217,9 @@ public class ParquetTableMetadataUtils {
    * Returns {@link FileMetadata} instance received by merging specified {@link RowGroupMetadata} list.
    *
    * @param rowGroups list of {@link RowGroupMetadata} to be merged
-   * @param tableName name of the table
-   * @param parquetTableMetadata the source of column metadata for non-interesting column's statistics
    * @return {@link FileMetadata} instance
    */
-  public static FileMetadata getFileMetadata(List<RowGroupMetadata> rowGroups, String tableName,
-      MetadataBase.ParquetTableMetadataBase parquetTableMetadata) {
+  public static FileMetadata getFileMetadata(Collection<RowGroupMetadata> rowGroups) {
     if (rowGroups.isEmpty()) {
       return null;
     }
@@ -222,8 +229,8 @@ public class ParquetTableMetadataUtils {
     TupleMetadata schema = rowGroups.iterator().next().getSchema();
 
     return new FileMetadata(rowGroups.iterator().next().getLocation(), schema,
-      mergeColumnsStatistics(rowGroups, rowGroups.iterator().next().getColumnsStatistics().keySet(), PARQUET_STATISTICS, parquetTableMetadata),
-      fileStatistics, tableName, -1);
+        mergeColumnsStatistics(rowGroups, rowGroups.iterator().next().getColumnsStatistics().keySet(), PARQUET_STATISTICS, null),
+        fileStatistics, null, -1);
   }
 
   /**

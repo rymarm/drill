@@ -25,6 +25,8 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 
+import org.apache.drill.categories.ParquetTest;
+import org.apache.drill.categories.UnlikelyTest;
 import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.planner.physical.PlannerSettings;
 import org.apache.drill.test.BaseTestQuery;
@@ -32,7 +34,9 @@ import org.joda.time.Period;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+@Category({ParquetTest.class, UnlikelyTest.class})
 public class TestDrillParquetReader extends BaseTestQuery {
   // enable decimal data type and make sure DrillParquetReader is used to handle test queries
   @BeforeClass

@@ -21,22 +21,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.KeyDeserializer;
+import org.apache.drill.common.expression.SchemaPath;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.schema.OriginalType;
+import org.apache.parquet.schema.PrimitiveType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.drill.common.expression.SchemaPath;
 
 import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.ColumnMetadata;
+import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.ColumnTypeMetadata;
 import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.ParquetFileMetadata;
 import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.ParquetTableMetadataBase;
 import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.RowGroupMetadata;
-import static org.apache.drill.exec.store.parquet.metadata.MetadataBase.ColumnTypeMetadata;
 import static org.apache.drill.exec.store.parquet.metadata.MetadataVersion.Constants.V4;
-import org.apache.hadoop.fs.Path;
-import org.apache.parquet.schema.OriginalType;
-import org.apache.parquet.schema.PrimitiveType;
 
 public class Metadata_V4 {
 
@@ -181,10 +182,6 @@ public class Metadata_V4 {
 
     public void setTotalRowCount(long totalRowCount) {
       metadataSummary.setTotalRowCount(totalRowCount);
-    }
-
-    public void setAllColumnsInteresting(boolean allColumnsInteresting) {
-      metadataSummary.allColumnsInteresting = allColumnsInteresting;
     }
   }
 
@@ -494,7 +491,7 @@ public class Metadata_V4 {
      RowGroup and the column type is built there as it is read from the footer.
      */
     @JsonProperty
-    public ConcurrentHashMap<ColumnTypeMetadata_v4.Key, ColumnTypeMetadata_v4> columnTypeInfo;
+    ConcurrentHashMap<ColumnTypeMetadata_v4.Key, ColumnTypeMetadata_v4> columnTypeInfo = new ConcurrentHashMap<>();
     @JsonProperty
     List<Path> directories;
     @JsonProperty
@@ -508,15 +505,15 @@ public class Metadata_V4 {
 
     }
 
-    public MetadataSummary(String metadataVersion, String drillVersion) {
-      this.metadataVersion = metadataVersion;
-      this.drillVersion = drillVersion;
+    public MetadataSummary(String metadataVersion, String drillVersion, boolean allColumnsInteresting) {
+      this(metadataVersion, drillVersion, new ArrayList<>(), allColumnsInteresting);
     }
 
-    public MetadataSummary(String metadataVersion, String drillVersion, List<Path> directories) {
+    public MetadataSummary(String metadataVersion, String drillVersion, List<Path> directories, boolean allColumnsInteresting) {
       this.metadataVersion = metadataVersion;
       this.drillVersion = drillVersion;
       this.directories = directories;
+      this.allColumnsInteresting = allColumnsInteresting;
     }
 
     @JsonIgnore
