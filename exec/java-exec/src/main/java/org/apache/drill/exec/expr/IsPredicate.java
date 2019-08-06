@@ -17,16 +17,16 @@
  */
 package org.apache.drill.exec.expr;
 
-import org.apache.drill.exec.expr.stat.RowsMatch;
-import org.apache.drill.exec.physical.base.GroupScan;
-import org.apache.drill.metastore.ColumnStatistics;
-import org.apache.drill.metastore.ColumnStatisticsKind;
-import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 import org.apache.drill.common.expression.LogicalExpression;
 import org.apache.drill.common.expression.LogicalExpressionBase;
 import org.apache.drill.common.expression.TypedFieldExpr;
 import org.apache.drill.common.expression.visitors.ExprVisitor;
 import org.apache.drill.exec.expr.fn.FunctionGenerationHelper;
+import org.apache.drill.exec.expr.stat.RowsMatch;
+import org.apache.drill.exec.physical.base.GroupScan;
+import org.apache.drill.metastore.ColumnStatistics;
+import org.apache.drill.metastore.ColumnStatisticsKind;
+import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -121,15 +121,28 @@ public class IsPredicate<C extends Comparable<C>> extends LogicalExpressionBase 
   }
 
   /**
-   * Checks that column chunk's statistics has only nulls
+   * Checks that column chunk's statistics has only nulls.
+   * <p/>
+   * Besides comparing number of nulls, we need to check
+   * if min and max values are also nulls to cover use cases for arrays,
+   * since array can hold N number of elements and nulls statistics
+   * is collected for all elements, thus number of nulls may be greater
+   * or equal to the number of rows.
+   * <p/>
+   * Two rows: [null, {"id": 1}], [null, {"id": 2}]
+   * <br/>
+   * Statistics: rows => 2, nulls => 2, min => 1, max => 2
    *
    * @param stat column statistics
    * @param rowCount number of rows of the specified statistics
+   * @param <T> type of column values
    * @return <tt>true</tt> if all rows are null, <tt>false</tt> otherwise
    */
-  static boolean isAllNulls(ColumnStatistics stat, long rowCount) {
-    Preconditions.checkArgument(rowCount >= 0, String.format("negative rowCount %d is not valid", rowCount));
-    return (long) stat.getStatistic(ColumnStatisticsKind.NULLS_COUNT) == rowCount;
+  static <T> boolean isAllNulls(ColumnStatistics<T> stat, long rowCount) {
+    Preconditions.checkArgument(rowCount >= 0, "negative rowCount %d is not valid", rowCount);
+    return (long) stat.getStatistic(ColumnStatisticsKind.NULLS_COUNT) >= rowCount
+      && stat.getValueStatistic(ColumnStatisticsKind.MIN_VALUE) == null
+      && stat.getValueStatistic(ColumnStatisticsKind.MAX_VALUE) == null;
   }
 
   static boolean hasNonNullValues(ColumnStatistics stat, long rowCount) {
