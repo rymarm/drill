@@ -17,7 +17,6 @@
  */
 package org.apache.drill.yarn.client;
 
-
 import org.apache.drill.yarn.core.DoyConfigException;
 import org.apache.drill.yarn.core.DrillOnYarnConfig;
 import org.apache.log4j.BasicConfigurator;
@@ -73,6 +72,7 @@ import org.apache.log4j.BasicConfigurator;
  */
 
 public class DrillOnYarn {
+
   public static void main(String argv[]) {
     BasicConfigurator.configure();
     ClientContext.init();
@@ -107,35 +107,35 @@ public class DrillOnYarn {
 
     ClientCommand cmd;
     switch (opts.getCommand()) {
-    case UPLOAD:
-      cmd = new StartCommand(true, false);
-      break;
-    case START:
-      cmd = new StartCommand(true, true);
-      break;
-    // Removed at QA request. QA wants a "real" restart. Also, upload of the
-    // archive is fast enough that a "start without upload" option is not really
-    // needed.
+      case UPLOAD:
+        cmd = new StartCommand(true, false);
+        break;
+      case START:
+        cmd = new StartCommand(true, true);
+        break;
+      // Removed at QA request. QA wants a "real" restart. Also, upload of the
+      // archive is fast enough that a "start without upload" option is not really
+      // needed.
 //    case RESTART:
 //      cmd = new StartCommand(false, true);
 //      break;
-    case DESCRIBE:
-      cmd = new PrintConfigCommand();
-      break;
-    case STATUS:
-      cmd = new StatusCommand();
-      break;
-    case STOP:
-      cmd = new StopCommand();
-      break;
-    case CLEAN:
-      cmd = new CleanCommand();
-      break;
-    case RESIZE:
-      cmd = new ResizeCommand();
-      break;
-    default:
-      cmd = new HelpCommand();
+      case DESCRIBE:
+        cmd = new PrintConfigCommand();
+        break;
+      case STATUS:
+        cmd = new StatusCommand();
+        break;
+      case STOP:
+        cmd = new StopCommand();
+        break;
+      case CLEAN:
+        cmd = new CleanCommand();
+        break;
+      case RESIZE:
+        cmd = new ResizeCommand();
+        break;
+      default:
+        cmd = new HelpCommand();
     }
 
     // Run the command.

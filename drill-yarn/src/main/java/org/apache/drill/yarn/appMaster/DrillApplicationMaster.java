@@ -44,6 +44,7 @@ import org.apache.drill.yarn.core.DrillOnYarnConfig;
  */
 
 public class DrillApplicationMaster {
+
   private static final Log LOG = LogFactory
       .getLog(DrillApplicationMaster.class);
 

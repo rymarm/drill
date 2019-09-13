@@ -54,20 +54,20 @@
     <h4>Enabled Storage Plugins</h4>
     <table class="table table-hover">
       <tbody>
-        <#list model as plugin>
-          <#if plugin.enabled() == true>
+        <#list model as pluginModel>
+          <#if pluginModel.getPlugin()?? && pluginModel.getPlugin().enabled() == true>
             <tr>
               <td style="border:none; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
-                ${plugin.getName()}
+                ${pluginModel.getPlugin().getName()}
               </td>
               <td style="border:none;">
-                <button type="button" class="btn btn-primary" onclick="location.href='/storage/${plugin.getName()}'">
+                <button type="button" class="btn btn-primary" onclick="location.href='/storage/${pluginModel.getPlugin().getName()}'">
                   Update
                 </button>
-                <button type="button" class="btn btn-warning" onclick="doEnable('${plugin.getName()}', false)">
+                <button type="button" class="btn btn-warning" onclick="doEnable('${pluginModel.getPlugin().getName()}', false)">
                   Disable
                 </button>
-                <button type="button" class="btn" name="${plugin.getName()}" data-toggle="modal"
+                <button type="button" class="btn" name="${pluginModel.getPlugin().getName()}" data-toggle="modal"
                         data-target="#pluginsModal">
                   Export
                 </button>
@@ -83,20 +83,20 @@
     <h4>Disabled Storage Plugins</h4>
     <table class="table table-hover">
       <tbody>
-        <#list model as plugin>
-          <#if plugin.enabled() == false>
+        <#list model as pluginModel>
+          <#if pluginModel.getPlugin()?? && pluginModel.getPlugin().enabled() == false>
             <tr>
               <td style="border:none; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
-                ${plugin.getName()}
+                ${pluginModel.getPlugin().getName()}
               </td>
               <td style="border:none;">
-                <button type="button" class="btn btn-primary" onclick="location.href='/storage/${plugin.getName()}'">
+                <button type="button" class="btn btn-primary" onclick="location.href='/storage/${pluginModel.getPlugin().getName()}'">
                   Update
                 </button>
-                <button type="button" class="btn btn-success" onclick="doEnable('${plugin.getName()}', true)">
+                <button type="button" class="btn btn-success" onclick="doEnable('${pluginModel.getPlugin().getName()}', true)">
                   Enable
                 </button>
-                <button type="button" class="btn" name="${plugin.getName()}" data-toggle="modal"
+                <button type="button" class="btn" name="${pluginModel.getPlugin().getName()}" data-toggle="modal"
                         data-target="#pluginsModal">
                   Export
                 </button>
@@ -188,6 +188,7 @@
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary" onclick="doCreate()">Create</button>
             </div>
+            <input type="hidden" name="csrfToken" value="${model[0].getCsrfToken()}">
           </form>
 
           <div id="message" class="hidden alert alert-info">
