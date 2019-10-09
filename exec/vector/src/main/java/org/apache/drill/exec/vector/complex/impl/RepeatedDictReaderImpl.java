@@ -22,7 +22,6 @@ import org.apache.drill.exec.expr.holders.RepeatedDictHolder;
 import org.apache.drill.exec.vector.ValueVector;
 import org.apache.drill.exec.vector.complex.RepeatedDictVector;
 import org.apache.drill.exec.vector.complex.reader.FieldReader;
-import org.apache.drill.exec.vector.complex.writer.BaseWriter;
 
 public class RepeatedDictReaderImpl extends AbstractFieldReader {
 
@@ -119,25 +118,7 @@ public class RepeatedDictReaderImpl extends AbstractFieldReader {
   }
 
   @Override
-  public void copyAsValue(BaseWriter.DictWriter writer) {
-    if (isEmpty()) {
-      return;
-    }
-
-    ValueVector vector;
-    int srcId;
-    if (writer instanceof RepeatedDictWriter) {
-      vector = ((RepeatedDictWriter) writer).container;
-      srcId = ((RepeatedDictWriter) writer).idx();
-    } else {
-      vector = ((SingleDictWriter) writer).container;
-      srcId = ((SingleDictWriter) writer).idx();
-    }
-    vector.copyEntry(srcId, container, idx());
-  }
-
-  @Override
   public String getTypeString() {
-    return "ARRAY<" + reader.getTypeString() + '>';
+    return "ARRAY<" + reader().getTypeString() + '>';
   }
 }

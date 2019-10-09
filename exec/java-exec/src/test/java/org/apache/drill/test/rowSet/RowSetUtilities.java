@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.drill.common.types.TypeProtos.MajorType;
 import org.apache.drill.common.types.TypeProtos.MinorType;
@@ -65,9 +67,9 @@ public class RowSetUtilities {
    * accessor. The value set here is purely for testing; the mapping
    * from ints to intervals has no real meaning.
    *
-   * @param rowWriter
-   * @param index
-   * @param value
+   * @param rowWriter writer where value will be written to
+   * @param index     target index
+   * @param value     value to write
    */
 
   public static void setFromInt(RowSetWriter rowWriter, int index, int value) {
@@ -128,10 +130,8 @@ public class RowSetUtilities {
    * of fields. The result has no meaning, but has the same comparison order as the
    * original ints.
    *
-   * @param writer column writer for a period column
    * @param minorType the Drill data type
    * @param value the integer value to apply
-   * @throws VectorOverflowException
    */
 
   public static Period periodFromInt(MinorType minorType, int value) {
@@ -158,8 +158,8 @@ public class RowSetUtilities {
   public static void assertEqualValues(String msg, ValueType type, Object expectedObj, Object actualObj) {
     switch (type) {
     case BYTES: {
-        byte expected[] = (byte[]) expectedObj;
-        byte actual[] = (byte[]) actualObj;
+        byte[] expected = (byte[]) expectedObj;
+        byte[] actual = (byte[]) actualObj;
         assertEquals(msg + " - byte lengths differ", expected.length, actual.length);
         assertTrue(msg, Arrays.areEqual(expected, actual));
         break;
@@ -196,7 +196,7 @@ public class RowSetUtilities {
   }
 
   public static byte[] byteArray(Integer... elements) {
-    byte array[] = new byte[elements.length];
+    byte[] array = new byte[elements.length];
     for (int i = 0; i < elements.length; i++) {
       array[i] = (byte) (int) elements[i];
     }
@@ -208,7 +208,7 @@ public class RowSetUtilities {
   }
 
   public static double[] doubleArray(Double... elements) {
-    double array[] = new double[elements.length];
+    double[] array = new double[elements.length];
     for (int i = 0; i < elements.length; i++) {
       array[i] = elements[i];
     }
@@ -220,7 +220,7 @@ public class RowSetUtilities {
   }
 
   public static int[] intArray(Integer... elements) {
-    int array[] = new int[elements.length];
+    int[] array = new int[elements.length];
     for (int i = 0; i < elements.length; i++) {
       array[i] = elements[i];
     }
@@ -265,4 +265,20 @@ public class RowSetUtilities {
     return new BigDecimal(value);
   }
 
+  /**
+   * Convenience method to bootstrap a map object given key-value sequence.
+   *
+   * @param entry key-value sequence
+   * @return map containing key-value pairs from passed sequence
+   */
+  public static Map<Object, Object> map(Object... entry) {
+    assert entry.length % 2 == 0 : "Array length should be even.";
+
+    // LinkedHashMap is chosen to preserve entry order
+    Map<Object, Object> map = new LinkedHashMap<>();
+    for (int i = 0; i < entry.length; i += 2) {
+      map.put(entry[i], entry[i + 1]);
+    }
+    return map;
+  }
 }

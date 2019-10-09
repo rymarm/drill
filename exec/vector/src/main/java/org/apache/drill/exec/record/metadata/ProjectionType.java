@@ -28,14 +28,20 @@ public enum ProjectionType {
   SCALAR,       // x (from schema)
   TUPLE,        // x.y
   ARRAY,        // x[0]
-  TUPLE_ARRAY;  // x[0].y
+  TUPLE_ARRAY,  // x[0].y
+  DICT, // x[0] or x['key'] (depends on key type)
+  DICT_ARRAY; // x[0][42] or x[0]['key'] (depends on key type)
 
   public boolean isTuple() {
     return this == ProjectionType.TUPLE || this == ProjectionType.TUPLE_ARRAY;
   }
 
   public boolean isArray() {
-    return this == ProjectionType.ARRAY || this == ProjectionType.TUPLE_ARRAY;
+    return this == ProjectionType.ARRAY || this == ProjectionType.TUPLE_ARRAY || this == DICT_ARRAY;
+  }
+
+  public boolean isDict() {
+    return this == DICT || this == DICT_ARRAY;
   }
 
   public boolean isMaybeScalar() {
@@ -48,6 +54,13 @@ public enum ProjectionType {
         return TUPLE_ARRAY;
       } else {
         return TUPLE;
+      }
+    }
+    if (majorType.getMinorType() == MinorType.DICT) {
+      if (majorType.getMode() == DataMode.REPEATED) {
+        return DICT_ARRAY;
+      } else {
+        return DICT;
       }
     }
     if (majorType.getMode() == DataMode.REPEATED) {
@@ -68,12 +81,17 @@ public enum ProjectionType {
 
     switch (this) {
     case ARRAY:
+      return other == ARRAY || other == TUPLE_ARRAY
+          || other == DICT // the actual key type should be validated later
+          || other == DICT_ARRAY;
     case TUPLE_ARRAY:
-      return other == ARRAY || other == TUPLE_ARRAY;
+      return other == TUPLE_ARRAY || other == DICT_ARRAY;
     case SCALAR:
       return other == SCALAR;
     case TUPLE:
-      return other == TUPLE;
+      return other == TUPLE || other == TUPLE_ARRAY || other == DICT || other == DICT_ARRAY;
+    case DICT:
+      return other == DICT || other == DICT_ARRAY;
     case UNPROJECTED:
     case UNSPECIFIED:
     case WILDCARD:

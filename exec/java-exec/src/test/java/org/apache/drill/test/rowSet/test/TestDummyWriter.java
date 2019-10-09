@@ -139,7 +139,7 @@ public class TestDummyWriter extends SubOperatorTest {
 
     {
       schema.metadata("m1").setProjected(false);
-      TupleMetadata mapSchema = schema.metadata("m1").mapSchema();
+      TupleMetadata mapSchema = schema.metadata("m1").tupleSchema();
       List<AbstractObjectWriter> members = new ArrayList<>();
       members.add(ColumnWriterFactory.buildColumnWriter(mapSchema.metadata("a"), null, null));
       members.add(ColumnWriterFactory.buildColumnWriter(mapSchema.metadata("b"), null, null));
@@ -148,7 +148,7 @@ public class TestDummyWriter extends SubOperatorTest {
 
     {
       schema.metadata("m2").setProjected(false);
-      TupleMetadata mapSchema = schema.metadata("m2").mapSchema();
+      TupleMetadata mapSchema = schema.metadata("m2").tupleSchema();
       List<AbstractObjectWriter> members = new ArrayList<>();
       members.add(ColumnWriterFactory.buildColumnWriter(mapSchema.metadata("c"), null, null));
       writers.add(MapWriter.buildMapWriter(schema.metadata("m2"), null, members));
@@ -179,4 +179,88 @@ public class TestDummyWriter extends SubOperatorTest {
     rootWriter.saveRow();
     rootWriter.endWrite();
   }
+
+
+/*
+
+  Need to be fixed
+
+  @Test
+  public void testDummyDict() {
+
+    final String dictName = "d";
+    final String dictArrayName = "da";
+
+    TupleMetadata schema = new SchemaBuilder()
+        .addDict(dictName, MinorType.INT)
+          .repeatedValue(MinorType.VARCHAR)
+          .resumeSchema()
+        .addDictArray(dictArrayName, MinorType.VARCHAR)
+          .value(MinorType.INT)
+          .resumeSchema()
+        .buildSchema();
+
+    List<AbstractObjectWriter> writers = new ArrayList<>();
+
+
+    final String keyFieldName = DictVector.FIELD_KEY_NAME;
+    final String valueFieldName = DictVector.FIELD_VALUE_NAME;
+
+    // Create key and value writers for dict
+
+    ColumnMetadata dictMetadata = schema.metadata(dictName);
+    TupleMetadata dictSchema = dictMetadata.tupleSchema();
+    List<AbstractObjectWriter> dictFields = new ArrayList<>();
+    dictFields.add(ColumnWriterFactory.buildColumnWriter(dictSchema.metadata(keyFieldName), null, null));
+    dictFields.add(ColumnWriterFactory.buildColumnWriter(dictSchema.metadata(valueFieldName), null, null));
+    writers.add(ObjectDictWriter.buildDict(dictMetadata, null, dictFields));
+
+    // Create key and value writers for dict array
+
+    ColumnMetadata dictArrayMetadata = schema.metadata(dictArrayName);
+    TupleMetadata dictArraySchema = dictArrayMetadata.tupleSchema();
+    List<AbstractObjectWriter> dictArrayFields = new ArrayList<>();
+    dictArrayFields.add(ColumnWriterFactory.buildColumnWriter(dictArraySchema.metadata(keyFieldName), null, null));
+    dictArrayFields.add(ColumnWriterFactory.buildColumnWriter(dictArraySchema.metadata(valueFieldName), null, null));
+    writers.add(ObjectDictWriter.buildDictArray(dictArrayMetadata, null, dictArrayFields));
+
+    AbstractTupleWriter rootWriter = new RootWriterFixture(schema, writers);
+
+    // Events are ignored.
+
+    rootWriter.startWrite();
+    rootWriter.startRow();
+
+    // Nothing is projected
+
+    DictWriter dictWriter = rootWriter.dict(dictName);
+    assertFalse(dictWriter.isProjected());
+    assertFalse(dictWriter.keyWriter().isProjected());
+    assertFalse(dictWriter.valueWriter().array().scalar().isProjected());
+
+    DictWriter dictWriter1 = rootWriter.array(dictArrayName).dict();
+    assertFalse(dictWriter1.isProjected());
+    assertFalse(dictWriter1.keyWriter().isProjected());
+    assertFalse(dictWriter1.valueWriter().scalar().isProjected());
+
+    // Dummy columns seem real.
+
+    rootWriter.dict(dictName).keyWriter().setInt(20);
+    rootWriter.dict(0).valueWriter().array().scalar().setString("foo");
+
+    // Dummy array dict seems real.
+
+    rootWriter.array(dictArrayName).dict().keyWriter().setString("foo");
+    rootWriter.array(dictArrayName).dict().valueWriter().scalar().setInt(30);
+    rootWriter.array(dictArrayName).save();
+    rootWriter.array(1).dict().keyWriter().setString("bar");
+    rootWriter.array(1).dict().valueWriter().scalar().setInt(40);
+    rootWriter.array(1).save();
+
+    // More ignored events.
+
+    rootWriter.restartRow();
+    rootWriter.saveRow();
+    rootWriter.endWrite();
+  }*/
 }
