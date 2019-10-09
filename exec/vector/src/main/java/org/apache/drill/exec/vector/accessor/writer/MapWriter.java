@@ -159,7 +159,7 @@ public abstract class MapWriter extends AbstractTupleWriter {
   protected final ColumnMetadata mapColumnSchema;
 
   protected MapWriter(ColumnMetadata schema, List<AbstractObjectWriter> writers) {
-    super(schema.mapSchema(), writers);
+    super(schema.tupleSchema(), writers);
     mapColumnSchema = schema;
   }
 
@@ -214,7 +214,7 @@ public abstract class MapWriter extends AbstractTupleWriter {
   }
 
   public static AbstractObjectWriter buildMapWriter(ColumnMetadata schema, AbstractMapVector vector) {
-    assert schema.mapSchema().size() == 0;
+    assert schema.tupleSchema().size() == 0;
     return buildMapWriter(schema, vector, new ArrayList<AbstractObjectWriter>());
   }
 

@@ -32,6 +32,21 @@ import org.apache.drill.exec.vector.accessor.writer.RepeatedListWriter;
  * <p>
  * Recursion is much easier if we can go bottom-up. But, writers
  * require top-down construction.
+ * <p>
+ * This particular class builds a column and all its contents.
+ * For example, given a map, which contains a repeated list which
+ * contains a repeated INT, this class first builds the map,
+ * then adds the repeated list, then adds the INT array. To do
+ * so, it will create a copy of the structured metadata.
+ * <p>
+ * A drawback of this approach is that the metadata objects used
+ * in the "parent" writers will be copies of, not the same as, those
+ * in the schema from which we are building the writers. At present,
+ * this is not an issue, but it is something to be aware of as uses
+ * become more sophisticated.
+ * <p>
+ * This class contrasts with the @{link ColumnBuilder} class which
+ * builds the structure within a single vector and writer.
  */
 
 public class BuildFromSchema {
@@ -49,6 +64,11 @@ public class BuildFromSchema {
     ObjectWriter add(ColumnMetadata colSchema);
   }
 
+  /**
+   * Shim used for adding a column to a tuple directly.
+   * This method will recursively invoke this builder
+   * to expand any nested content.
+   */
   private static class TupleShim implements ParentShim {
     private final TupleWriter writer;
 
@@ -114,6 +134,8 @@ public class BuildFromSchema {
       buildSingleList(parent, colSchema);
     } else if (colSchema.isVariant()) {
       buildVariant(parent, colSchema);
+    } else if (colSchema.isDict()) {
+      buildDict(parent, colSchema);
     } else {
       buildPrimitive(parent, colSchema);
     }
@@ -144,9 +166,9 @@ public class BuildFromSchema {
 
   private void expandMap(ObjectWriter colWriter, ColumnMetadata colSchema) {
     if (colSchema.isArray()) {
-      buildTuple(colWriter.array().tuple(), colSchema.mapSchema());
+      buildTuple(colWriter.array().tuple(), colSchema.tupleSchema());
     } else {
-      buildTuple(colWriter.tuple(), colSchema.mapSchema());
+      buildTuple(colWriter.tuple(), colSchema.tupleSchema());
     }
   }
 
@@ -212,7 +234,7 @@ public class BuildFromSchema {
 
   /**
    * We've just built a writer for column. If the column is structured
-   * (AKA "complex", meaning a map or list or array), then we need to
+   * (AKA "complex", meaning a map, list, array or dict), then we need to
    * build writer for the components of the column. We do that recursively
    * here.
    *
@@ -232,8 +254,24 @@ public class BuildFromSchema {
       assert false;
     } else if (colSchema.isVariant()) {
       expandVariant(colWriter, colSchema);
+    } else if (colSchema.isDict()) {
+      expandDict(colWriter, colSchema);
     // } else {
       // Nothing to expand for primitives
+    }
+  }
+
+  private ObjectWriter buildDict(ParentShim parent, ColumnMetadata colSchema) {
+    final ObjectWriter colWriter = parent.add(colSchema.cloneEmpty());
+    expandDict(colWriter, colSchema);
+    return colWriter;
+  }
+
+  private void expandDict(ObjectWriter colWriter, ColumnMetadata colSchema) {
+    if (colSchema.isArray()) {
+      buildTuple(colWriter.array().dict().tuple(), colSchema.tupleSchema());
+    } else {
+      buildTuple(colWriter.dict().tuple(), colSchema.tupleSchema());
     }
   }
 }

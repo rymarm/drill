@@ -27,6 +27,7 @@ import org.apache.drill.exec.record.metadata.TupleMetadata;
 import org.apache.drill.exec.vector.accessor.ArrayWriter;
 import org.apache.drill.exec.vector.accessor.ColumnWriter;
 import org.apache.drill.exec.vector.accessor.ColumnWriterIndex;
+import org.apache.drill.exec.vector.accessor.DictWriter;
 import org.apache.drill.exec.vector.accessor.ObjectType;
 import org.apache.drill.exec.vector.accessor.ObjectWriter;
 import org.apache.drill.exec.vector.accessor.ScalarWriter;
@@ -105,7 +106,7 @@ public abstract class AbstractTupleWriter implements TupleWriter, WriterEvents {
 
   public static class TupleObjectWriter extends AbstractObjectWriter {
 
-    private final AbstractTupleWriter tupleWriter;
+    protected final AbstractTupleWriter tupleWriter;
 
     public TupleObjectWriter(AbstractTupleWriter tupleWriter) {
       this.tupleWriter = tupleWriter;
@@ -145,6 +146,35 @@ public abstract class AbstractTupleWriter implements TupleWriter, WriterEvents {
 
     ProjectionType projectionType(String columnName);
   }
+
+  /**
+   * Wrap the outer index to avoid incrementing the array index
+   * on the call to <tt>nextElement().</tt> The increment
+   * is done at the tuple level, not the column level.
+   */
+
+  static class MemberWriterIndex implements ColumnWriterIndex {
+    private ColumnWriterIndex baseIndex;
+
+    MemberWriterIndex(ColumnWriterIndex baseIndex) {
+      this.baseIndex = baseIndex;
+    }
+
+    @Override public int rowStartIndex() { return baseIndex.rowStartIndex(); }
+    @Override public int vectorIndex() { return baseIndex.vectorIndex(); }
+    @Override public void nextElement() { }
+    @Override public void rollover() { }
+
+    @Override public ColumnWriterIndex outerIndex() {
+      return baseIndex.outerIndex();
+    }
+
+    @Override
+    public String toString() {
+      return "[" + getClass().getSimpleName() + " baseIndex = " + baseIndex.toString() + "]";
+    }
+  }
+
 
   protected final TupleMetadata tupleSchema;
   protected final List<AbstractObjectWriter> writers;
@@ -316,8 +346,8 @@ public abstract class AbstractTupleWriter implements TupleWriter, WriterEvents {
     // Rollover can only happen while a row is in progress.
 
     assert state == State.IN_ROW;
-    for (int i = 0; i < writers.size(); i++) {
-      writers.get(i).events().postRollover();
+    for (AbstractObjectWriter writer : writers) {
+      writer.events().postRollover();
     }
   }
 
@@ -409,6 +439,16 @@ public abstract class AbstractTupleWriter implements TupleWriter, WriterEvents {
   @Override
   public VariantWriter variant(String colName) {
     return column(colName).variant();
+  }
+
+  @Override
+  public DictWriter dict(int colIndex) {
+    return column(colIndex).dict();
+  }
+
+  @Override
+  public DictWriter dict(String colName) {
+    return column(colName).dict();
   }
 
   @Override
