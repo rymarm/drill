@@ -66,11 +66,12 @@ public class TupleSchema extends AbstractPropertied implements TupleMetadata {
     this.parentMap = parentMap;
   }
 
-  public TupleMetadata copy() {
-    TupleMetadata tuple = new TupleSchema();
+  public TupleSchema copy() {
+    TupleSchema tuple = new TupleSchema();
     for (ColumnMetadata md : this) {
       tuple.addColumn(md.copy());
     }
+    tuple.setProperties(properties());
     return tuple;
   }
 

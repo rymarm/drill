@@ -82,7 +82,7 @@ public class RowSetPrinter {
       out.print(colSchema.name());
       if (colSchema.isMap()) {
         out.print("{");
-        printTupleSchema(out, colSchema.mapSchema());
+        printTupleSchema(out, colSchema.tupleSchema());
         out.print("}");
       }
     }

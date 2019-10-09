@@ -228,7 +228,7 @@ public class TestSchemaParser {
     assertTrue(map.isMap());
     assertEquals(TypeProtos.DataMode.REQUIRED, map.mode());
 
-    TupleMetadata mapSchema = map.mapSchema();
+    TupleMetadata mapSchema = map.tupleSchema();
     assertFalse(mapSchema.metadata("m1").isNullable());
     assertTrue(mapSchema.metadata("m2").isNullable());
   }
@@ -247,7 +247,7 @@ public class TestSchemaParser {
     ColumnMetadata mapArray = schema.metadata("ma");
     assertTrue(mapArray.isArray());
     assertTrue(mapArray.isMap());
-    TupleMetadata mapSchema = mapArray.mapSchema();
+    TupleMetadata mapSchema = mapArray.tupleSchema();
     assertFalse(mapSchema.metadata("m1").isNullable());
     assertTrue(mapSchema.metadata("m2").isNullable());
   }

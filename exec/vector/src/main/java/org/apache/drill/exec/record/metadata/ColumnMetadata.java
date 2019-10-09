@@ -109,7 +109,12 @@ public interface ColumnMetadata extends Propertied {
      * the code has evolved.
      */
 
-    MULTI_ARRAY
+    MULTI_ARRAY,
+
+    /**
+     * Dict or repeated dict.
+     */
+    DICT
   }
 
   int DEFAULT_ARRAY_SIZE = 10;
@@ -122,7 +127,7 @@ public interface ColumnMetadata extends Propertied {
    * @return the tuple schema
    */
 
-  TupleMetadata mapSchema();
+  TupleMetadata tupleSchema();
 
   /**
    * Schema for <tt>VARIANT</tt> columns.

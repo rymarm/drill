@@ -56,11 +56,14 @@ import org.apache.drill.exec.vector.accessor.writer.ColumnWriterFactory;
 import org.apache.drill.exec.vector.accessor.writer.EmptyListShim;
 import org.apache.drill.exec.vector.accessor.writer.ListWriterImpl;
 import org.apache.drill.exec.vector.accessor.writer.MapWriter;
+import org.apache.drill.exec.vector.accessor.writer.ObjectDictWriter;
 import org.apache.drill.exec.vector.accessor.writer.RepeatedListWriter;
 import org.apache.drill.exec.vector.accessor.writer.UnionWriterImpl;
 import org.apache.drill.exec.vector.accessor.writer.UnionWriterImpl.VariantObjectWriter;
+import org.apache.drill.exec.vector.complex.DictVector;
 import org.apache.drill.exec.vector.complex.ListVector;
 import org.apache.drill.exec.vector.complex.MapVector;
+import org.apache.drill.exec.vector.complex.RepeatedDictVector;
 import org.apache.drill.exec.vector.complex.RepeatedListVector;
 import org.apache.drill.exec.vector.complex.RepeatedMapVector;
 import org.apache.drill.exec.vector.complex.RepeatedValueVector;
@@ -85,6 +88,7 @@ import org.apache.drill.exec.vector.complex.UnionVector;
  * the column is projected, but the implied projection type is incompatible with
  * the actual type. (Such as trying to project an INT as x[0].)
  */
+
 public class ColumnBuilder {
 
   private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ColumnBuilder.class);
@@ -154,6 +158,8 @@ public class ColumnBuilder {
     // Build the column
 
     switch (outputCol.outputSchema().structureType()) {
+    case DICT:
+      return buildDict(parent, outputCol);
     case TUPLE:
       return buildMap(parent, outputCol);
     case VARIANT:
@@ -205,7 +211,7 @@ public class ColumnBuilder {
     }
 
     ValueVector vector;
-    if (projType == ProjectionType.UNPROJECTED) {
+    if (projType == ProjectionType.UNPROJECTED && !allowCreation(parent)) {
 
       // Column is not projected. No materialized backing for the column.
 
@@ -250,6 +256,21 @@ public class ColumnBuilder {
         vectorState);
   }
 
+  /**
+   * Check if this is a special case when vector, writer and column state should be
+   * created for a primitive field though the field itself is not projected. This is
+   * needed in case when {@code DICT}'s {@code value} is accessed by key, because
+   * {@code DICT}'s {@code keys} field is not projected but is needed to be initialized
+   * to ensure the dict vector is constructed properly ({@code DICT} should have both
+   * {@code keys} and {@code values} vectors as they are paired).
+   *
+   * @param parent container containing the primitive
+   * @return {@code true} if the parent is {@code DICT} and its {@code value} is accessed by key
+   */
+  private boolean allowCreation(ContainerState parent) {
+    return parent instanceof TupleState.DictState && !parent.projectionSet().projections().isEmpty();
+  }
+
   private void incompatibleProjection(ProjectionType projType,
       ColumnMetadata columnSchema) {
     StringBuilder buf = new StringBuilder()
@@ -263,6 +284,9 @@ public class ColumnBuilder {
       break;
     case TUPLE_ARRAY:
       buf.append("tuple array (a[n].x");
+      break;
+    case DICT:
+      buf.append("dict (a['key'])");
       break;
     default:
       throw new IllegalStateException("Unexpected projection type: " + projType);
@@ -294,7 +318,7 @@ public class ColumnBuilder {
     // calls.
 
     assert columnSchema.isMap();
-    assert columnSchema.mapSchema().size() == 0;
+    assert columnSchema.tupleSchema().isEmpty();
 
     // Create the vector, vector state and writer.
 
@@ -328,7 +352,7 @@ public class ColumnBuilder {
       // have content that varies from batch to batch. Only the leaf
       // vectors can be cached.
 
-      assert columnSchema.mapSchema().isEmpty();
+      assert columnSchema.tupleSchema().isEmpty();
       vector = new MapVector(columnSchema.schema(), parent.loader().allocator(), null);
       vectorState = new MapVectorState(vector, new NullVectorState());
     }
@@ -362,7 +386,7 @@ public class ColumnBuilder {
       // have content that varies from batch to batch. Only the leaf
       // vectors can be cached.
 
-      assert columnSchema.mapSchema().isEmpty();
+      assert columnSchema.tupleSchema().isEmpty();
       mapVector = new RepeatedMapVector(mapColSchema.schema(),
           parent.loader().allocator(), null);
       offsetVector = mapVector.getOffsetVector();
@@ -675,5 +699,153 @@ public class ColumnBuilder {
 
     return new RepeatedListColumnState(parent.loader(),
         arrayWriter, vectorState, listState);
+  }
+
+  private ColumnState buildDict(ContainerState parent, ColumnTransform outputCol) {
+    ColumnMetadata columnSchema = outputCol.outputSchema();
+
+    // When dynamically adding columns, must add the (empty)
+    // dict by itself, then add columns to the dict via separate
+    // calls (the same way as is done for MAP).
+
+    assert columnSchema.isDict();
+    assert columnSchema.tupleSchema().isEmpty();
+
+    // Create the vector, vector state and writer.
+
+    if (columnSchema.isArray()) {
+      return buildDictArray(parent, outputCol);
+    } else {
+      return buildSingleDict(parent, outputCol);
+    }
+  }
+
+  private ColumnState buildDictArray(ContainerState parent, ColumnTransform outputCol) {
+    ProjectionType projType = outputCol.projectionType();
+    ColumnMetadata columnSchema = outputCol.outputSchema();
+
+    // Create the dict's offset vector.
+
+    RepeatedDictVector repeatedDictVector;
+    UInt4Vector offsetVector;
+    if (projType == ProjectionType.UNPROJECTED) {
+      repeatedDictVector = null;
+      offsetVector = null;
+    } else {
+
+      // Creating the dict vector will create its contained vectors if we
+      // give it a materialized field with children. So, instead pass a clone
+      // without children so we can add them.
+
+      final ColumnMetadata dictColMetadata = columnSchema.cloneEmpty();
+
+      // Don't get the dict vector from the vector cache. Dict vectors may
+      // have content that varies from batch to batch. Only the leaf
+      // vectors can be cached.
+
+      assert columnSchema.tupleSchema().isEmpty();
+      repeatedDictVector = new RepeatedDictVector(dictColMetadata.schema(),
+          parent.loader().allocator(), null);
+      offsetVector = repeatedDictVector.getOffsetVector();
+    }
+
+    // Create the writer using the offset vector
+
+    final AbstractObjectWriter writer = ObjectDictWriter.buildDictArray(
+        columnSchema, repeatedDictVector, new ArrayList<>());
+
+    // Wrap the offset vector in a vector state
+
+    VectorState offsetVectorState;
+    VectorState dictOffsetVectorState;
+    if (projType == ProjectionType.UNPROJECTED) {
+      offsetVectorState = new NullVectorState();
+      dictOffsetVectorState = new NullVectorState();
+    } else {
+      AbstractArrayWriter arrayWriter = (AbstractArrayWriter) writer.array();
+      offsetVectorState = new OffsetVectorState(
+          arrayWriter.offsetWriter(),
+          offsetVector,
+          writer.array().entry().events());
+      dictOffsetVectorState = new OffsetVectorState(
+          ((AbstractArrayWriter) arrayWriter.array()).offsetWriter(),
+          ((DictVector) repeatedDictVector.getDataVector()).getOffsetVector(),
+          writer.array().entry().dict().entry().events());
+    }
+    final VectorState mapVectorState =
+        new TupleState.DictArrayVectorState(repeatedDictVector, offsetVectorState, dictOffsetVectorState);
+
+    // Assemble it all into the column state.
+
+    final TupleState.DictArrayState dictArrayState = new TupleState.DictArrayState(parent.loader(),
+        parent.vectorCache().childCache(columnSchema.name()),
+        parent.projectionSet().mapProjection(columnSchema.name()));
+    return new TupleState.DictColumnState(
+        dictArrayState, writer, mapVectorState, parent.isVersioned());
+  }
+
+  private ColumnState buildSingleDict(ContainerState parent, ColumnTransform outputCol) {
+
+    ProjectionType projType = outputCol.projectionType();
+    ColumnMetadata columnSchema = outputCol.outputSchema();
+
+    /* Add something like that and think about other buildSingleMap, ..
+
+    switch (projType) {
+      case ARRAY:
+      case TUPLE_ARRAY:
+        incompatibleProjection(projType, columnSchema);
+        break;
+      default:
+        break;
+    } */
+
+    // Create the dict's offset vector.
+
+    DictVector dictVector;
+    UInt4Vector offsetVector;
+    if (projType == ProjectionType.UNPROJECTED) {
+      dictVector = null;
+      offsetVector = null;
+    } else {
+
+      // Creating the dict vector will create its contained vectors if we
+      // give it a materialized field with children. So, instead pass a clone
+      // without children so we can add them.
+
+      final ColumnMetadata dictColMetadata = columnSchema.cloneEmpty();
+
+      // Don't get the dict vector from the vector cache. Dict vectors may
+      // have content that varies from batch to batch. Only the leaf
+      // vectors can be cached.
+
+      assert columnSchema.tupleSchema().isEmpty();
+      dictVector = new DictVector(dictColMetadata.schema(), parent.loader().allocator(), null);
+      offsetVector = dictVector.getOffsetVector();
+    }
+
+    // Create the writer using the offset vector
+
+    final AbstractObjectWriter writer = ObjectDictWriter.buildDict(columnSchema, dictVector, new ArrayList<>());
+
+    // Wrap the offset vector in a vector state
+
+    VectorState offsetVectorState;
+    if (projType == ProjectionType.UNPROJECTED) {
+      offsetVectorState = new NullVectorState();
+    } else {
+      offsetVectorState = new OffsetVectorState(
+          (((AbstractArrayWriter) writer.dict()).offsetWriter()),
+          offsetVector,
+          writer.dict().entry().events());
+    }
+    final VectorState mapVectorState = new TupleState.SingleDictVectorState(dictVector, offsetVectorState);
+
+    // Assemble it all into the column state.
+
+    final TupleState.SingleDictState dictArrayState = new TupleState.SingleDictState(parent.loader(), parent.vectorCache().childCache(columnSchema.name()),
+        parent.projectionSet().mapProjection(columnSchema.name()));
+    return new TupleState.DictColumnState(
+        dictArrayState, writer, mapVectorState, parent.isVersioned());
   }
 }

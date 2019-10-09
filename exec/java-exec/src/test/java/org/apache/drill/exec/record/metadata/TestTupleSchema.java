@@ -67,7 +67,7 @@ public class TestTupleSchema extends SubOperatorTest {
     // Generic checks
 
     assertEquals(ColumnMetadata.StructureType.PRIMITIVE, col.structureType());
-    assertNull(col.mapSchema());
+    assertNull(col.tupleSchema());
     assertTrue(field.isEquivalent(col.schema()));
     assertEquals(field.getName(), col.name());
     assertEquals(field.getType().getMinorType(), col.type());
@@ -160,7 +160,7 @@ public class TestTupleSchema extends SubOperatorTest {
     ColumnMetadata col = MetadataUtils.fromField(field);
 
     assertEquals(ColumnMetadata.StructureType.PRIMITIVE, col.structureType());
-    assertNull(col.mapSchema());
+    assertNull(col.tupleSchema());
     assertFalse(col.isNullable());
     assertFalse(col.isArray());
     assertTrue(col.isVariableWidth());
@@ -271,9 +271,9 @@ public class TestTupleSchema extends SubOperatorTest {
     ColumnMetadata col = MetadataUtils.fromField(field);
 
     assertTrue(col instanceof MapColumnMetadata);
-    assertNotNull(col.mapSchema());
-    assertEquals(0, col.mapSchema().size());
-    assertSame(col, col.mapSchema().parent());
+    assertNotNull(col.tupleSchema());
+    assertEquals(0, col.tupleSchema().size());
+    assertSame(col, col.tupleSchema().parent());
 
     MapColumnMetadata mapCol = (MapColumnMetadata) col;
     assertNull(mapCol.parentTuple());
@@ -301,8 +301,8 @@ public class TestTupleSchema extends SubOperatorTest {
     ColumnMetadata col = MetadataUtils.fromField(field);
 
     assertTrue(col instanceof MapColumnMetadata);
-    assertNotNull(col.mapSchema());
-    assertEquals(0, col.mapSchema().size());
+    assertNotNull(col.tupleSchema());
+    assertEquals(0, col.tupleSchema().size());
 
     assertFalse(col.isNullable());
     assertTrue(col.isArray());
@@ -528,7 +528,7 @@ public class TestTupleSchema extends SubOperatorTest {
 
     // And it is equivalent to the round trip to a batch schema.
 
-    BatchSchema batchSchema = root.toBatchSchema(SelectionVectorMode.NONE);
+    BatchSchema batchSchema = new BatchSchema(SelectionVectorMode.NONE, root.toFieldList());
     assertTrue(root.isEquivalent(MetadataUtils.fromFields(batchSchema)));
   }
 
@@ -548,15 +548,15 @@ public class TestTupleSchema extends SubOperatorTest {
 
     MaterializedField fieldA = SchemaBuilder.columnSchema("a", MinorType.MAP, DataMode.REQUIRED);
     ColumnMetadata colA = root.add(fieldA);
-    TupleMetadata mapA = colA.mapSchema();
+    TupleMetadata mapA = colA.tupleSchema();
 
     MaterializedField fieldB = SchemaBuilder.columnSchema("b.x", MinorType.MAP, DataMode.REQUIRED);
     ColumnMetadata colB = mapA.add(fieldB);
-    TupleMetadata mapB = colB.mapSchema();
+    TupleMetadata mapB = colB.tupleSchema();
 
     MaterializedField fieldC = SchemaBuilder.columnSchema("c.y", MinorType.MAP, DataMode.REQUIRED);
     ColumnMetadata colC = mapB.add(fieldC);
-    TupleMetadata mapC = colC.mapSchema();
+    TupleMetadata mapC = colC.tupleSchema();
 
     MaterializedField fieldD = SchemaBuilder.columnSchema("d", MinorType.VARCHAR, DataMode.REQUIRED);
     ColumnMetadata colD = mapC.add(fieldD);
@@ -602,7 +602,7 @@ public class TestTupleSchema extends SubOperatorTest {
     // Copying should be deep.
 
     TupleMetadata root2 = root.copy();
-    assertEquals(2, root2.metadata(0).mapSchema().metadata(0).mapSchema().metadata(0).mapSchema().size());
+    assertEquals(2, root2.metadata(0).tupleSchema().metadata(0).tupleSchema().metadata(0).tupleSchema().size());
     assert(root.isEquivalent(root2));
 
     // Generate a materialized field and compare.
@@ -640,11 +640,11 @@ public class TestTupleSchema extends SubOperatorTest {
 
     // Get the parts.
 
-    TupleMetadata mapA = colA.mapSchema();
+    TupleMetadata mapA = colA.tupleSchema();
     ColumnMetadata colB = mapA.metadata("b.x");
-    TupleMetadata mapB = colB.mapSchema();
+    TupleMetadata mapB = colB.tupleSchema();
     ColumnMetadata colC = mapB.metadata("c.y");
-    TupleMetadata mapC = colC.mapSchema();
+    TupleMetadata mapC = colC.tupleSchema();
     ColumnMetadata colD = mapC.metadata("d");
     ColumnMetadata colE = mapC.metadata("e");
 
@@ -800,7 +800,7 @@ public class TestTupleSchema extends SubOperatorTest {
     assertTrue(union.hasType(MinorType.LIST));
 
     ColumnMetadata mapCol = union.member(MinorType.MAP);
-    TupleMetadata mapSchema = mapCol.mapSchema();
+    TupleMetadata mapSchema = mapCol.tupleSchema();
     assertEquals(2, mapSchema.size());
 
     ColumnMetadata listCol = union.member(MinorType.LIST);
@@ -822,4 +822,5 @@ public class TestTupleSchema extends SubOperatorTest {
       // Expected
     }
   }
+  /* Conflicts with tests */
 }

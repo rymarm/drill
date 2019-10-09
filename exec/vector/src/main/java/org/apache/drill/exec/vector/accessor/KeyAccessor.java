@@ -17,22 +17,24 @@
  */
 package org.apache.drill.exec.vector.accessor;
 
-/**
- * Defines a reader to get values for value vectors using
- * a simple, uniform interface modeled after a JSON object.
- * Every column value is an object of one of three types:
- * scalar, array or tuple. Methods exist to "cast" this object
- * to the proper type. This model allows a very simple representation:
- * tuples (rows, maps) consist of objects. Arrays are lists of
- * objects.
- * <p>
- * {@see ObjectWriter>
- */
+import org.joda.time.Instant;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.Period;
 
-public interface ObjectReader extends ColumnReader {
-  ScalarReader scalar();
-  TupleReader tuple();
-  ArrayReader array();
-  VariantReader variant();
-  DictReader dict();
+import java.math.BigDecimal;
+
+public interface KeyAccessor {
+
+  boolean find(boolean key);
+  boolean find(int key);
+  boolean find(BigDecimal key);
+  boolean find(double key);
+  boolean find(long key);
+  boolean find(String key);
+  boolean find(byte[] key);
+  boolean find(Period key);
+  boolean find(LocalDate key);
+  boolean find(LocalTime key);
+  boolean find(Instant key);
 }
