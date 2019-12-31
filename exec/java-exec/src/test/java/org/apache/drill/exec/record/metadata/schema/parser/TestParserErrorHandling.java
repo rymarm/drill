@@ -21,6 +21,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.IOException;
+
 public class TestParserErrorHandling {
 
   @Rule
@@ -119,6 +121,30 @@ public class TestParserErrorHandling {
   }
 
   @Test
+  public void testIncorrectMapKeyType() throws Exception {
+    String schema = "col map<array<int>, varchar>";
+    thrown.expect(IOException.class);
+    thrown.expectMessage("mismatched input 'array' expecting {'INT', 'INTEGER',");
+    SchemaExprParser.parseSchema(schema);
+  }
+
+  @Test
+  public void testMapKeyWithName() throws Exception {
+    String schema = "col map<`key` int, `value` varchar>";
+    thrown.expect(IOException.class);
+    thrown.expectMessage("extraneous input '`key`' expecting {'INT', 'INTEGER',");
+    SchemaExprParser.parseSchema(schema);
+  }
+
+  @Test
+  public void testMapMissingComma() throws Exception {
+    String schema = "col map<int varchar>";
+    thrown.expect(IOException.class);
+    thrown.expectMessage("missing ',' at 'varchar'");
+    SchemaExprParser.parseSchema(schema);
+  }
+
+  @Test
   public void testMissingNotBeforeNull() {
     String schema = "col int null";
     thrown.expect(SchemaParsingException.class);
@@ -149,5 +175,4 @@ public class TestParserErrorHandling {
     thrown.expectMessage("extraneous input '2' expecting ')'");
     SchemaExprParser.parseSchema(schema);
   }
-
 }

@@ -195,24 +195,74 @@ public class TestSchemaParser {
         + ", struct_array array<struct<m1 int, m2 varchar>>"
         + ", nested_array_struct array<array<struct<nm1 int, nm2 varchar>>>",
       schema);
-
   }
 
   @Test
-  public void testStruct() {
+  public void testStruct() throws Exception {
     TupleMetadata schema = new SchemaBuilder()
       .addMap("struct_col")
         .addNullable("int_col", TypeProtos.MinorType.INT)
         .addArray("array_col", TypeProtos.MinorType.INT)
         .addMap("nested_struct")
-          .addNullable("m1", TypeProtos.MinorType.INT)
-          .addNullable("m2", TypeProtos.MinorType.VARCHAR)
+          .addNullable("s1", TypeProtos.MinorType.INT)
+          .addNullable("s2", TypeProtos.MinorType.VARCHAR)
+        .resumeMap()
+        .addDict("map_col", TypeProtos.MinorType.VARCHAR)
+          .nullableValue(TypeProtos.MinorType.INT)
         .resumeMap()
       .resumeSchema()
       .buildSchema();
 
+    checkSchema("struct_col struct<int_col int"
+      + ", array_col array<int>"
+      + ", nested_struct struct<s1 int, s2 varchar>"
+      + ", map_col map<varchar, int>"
+      + ">", schema);
+  }
+
+  /* Fix test
+
+  @Test
+  public void testMap() throws Exception {
+    TupleMetadata schema = new SchemaBuilder()
+        .addDict("dict_col_simple", TypeProtos.MinorType.VARCHAR)
+          .nullableValue(TypeProtos.MinorType.INT)
+        .resumeSchema()
+        .addDict("dict_col_simple_ps", TypeProtos.MajorType.newBuilder()
+            .setMinorType(TypeProtos.MinorType.VARCHAR)
+            .setPrecision(50)
+            .setMode(TypeProtos.DataMode.REQUIRED)
+            .build())
+          .value(TypeProtos.MajorType.newBuilder()
+            .setMinorType(TypeProtos.MinorType.VARDECIMAL)
+            .setPrecision(10)
+            .setScale(2)
+            .setMode(TypeProtos.DataMode.REQUIRED)
+            .build())
+        .resumeSchema()
+        .addDict("dict_col_struct", TypeProtos.MinorType.INT)
+          .mapValue()
+            .add("sb", TypeProtos.MinorType.BIT)
+            .addNullable("si", TypeProtos.MinorType.INT)
+          .resumeDict()
+        .resumeSchema()
+        .addDict("dict_col_dict", TypeProtos.MinorType.VARCHAR)
+          .dictValue()
+            .key(TypeProtos.MinorType.INT)
+            .nullableValue(TypeProtos.MinorType.BIT)
+          .resumeDict()
+        .resumeSchema()
+        .addDict("dict_col_array", TypeProtos.MinorType.BIGINT)
+          .dictArrayValue()
+            .key(TypeProtos.MinorType.DATE)
+            .nullableValue(TypeProtos.MinorType.FLOAT8)
+          .resumeDict()
+        .resumeSchema()
+      .buildSchema();
+
     checkSchema("struct_col struct<int_col int, array_col array<int>, nested_struct struct<m1 int, m2 varchar>>", schema);
   }
+   */
 
   @Test
   public void testModeForSimpleType() {
@@ -243,6 +293,13 @@ public class TestSchemaParser {
     ColumnMetadata nestedArray = schema.metadata("aa");
     assertTrue(nestedArray.isArray());
     assertTrue(nestedArray.childSchema().isArray());
+
+    ColumnMetadata structArray = schema.metadata("sa");
+    assertTrue(structArray.isArray());
+    assertTrue(structArray.isMap());
+    TupleMetadata structSchema = structArray.tupleSchema();
+    assertFalse(structSchema.metadata("s1").isNullable());
+    assertTrue(structSchema.metadata("s2").isNullable());
 
     ColumnMetadata mapArray = schema.metadata("ma");
     assertTrue(mapArray.isArray());
@@ -312,5 +369,4 @@ public class TestSchemaParser {
     );
 
   }
-
 }
