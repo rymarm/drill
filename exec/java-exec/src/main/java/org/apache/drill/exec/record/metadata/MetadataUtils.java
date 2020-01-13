@@ -169,8 +169,8 @@ public class MetadataUtils {
     }
   }
 
-  public static DictColumnMetadata newDict(String name, TupleMetadata schema) {
-    return new DictColumnMetadata(name, DataMode.REQUIRED, (TupleSchema) schema);
+  public static DictColumnMetadata newDict(String name) {
+    return new DictColumnMetadata(name, DataMode.REQUIRED);
   }
 
   public static VariantColumnMetadata newVariant(MaterializedField field, VariantSchema schema) {
@@ -194,6 +194,10 @@ public class MetadataUtils {
 
   public static ColumnMetadata newMapArray(String name, TupleMetadata schema) {
     return new MapColumnMetadata(name, DataMode.REPEATED, (TupleSchema) schema);
+  }
+
+  public static DictColumnMetadata newDictArray(String name) {
+    return new DictColumnMetadata(name, DataMode.REPEATED);
   }
 
   public static PrimitiveColumnMetadata newScalar(String name, MinorType type,
