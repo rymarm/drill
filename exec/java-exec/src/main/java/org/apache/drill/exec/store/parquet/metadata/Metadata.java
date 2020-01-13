@@ -589,7 +589,7 @@ public class Metadata {
       } else {
         if (isFileMetadata) {
           parquetTableMetadata.assignFiles((mapper.readValue(is, FileMetadata.class)).getFiles());
-          if (new MetadataVersion(parquetTableMetadata.getMetadataVersion()).compareTo(new MetadataVersion(4, 0)) >= 0) {
+          if (new MetadataVersion(parquetTableMetadata.getMetadataVersion()).isAtLeast(4, 0)) {
             ((ParquetTableMetadata_v4) parquetTableMetadata).updateRelativePaths(metadataParentDirPath);
           }
 
@@ -603,7 +603,7 @@ public class Metadata {
           parquetTableMetadata = new ParquetTableMetadata_v4(metadataSummary);
         } else {
           parquetTableMetadata = mapper.readValue(is, ParquetTableMetadataBase.class);
-          if (new MetadataVersion(parquetTableMetadata.getMetadataVersion()).compareTo(new MetadataVersion(3, 0)) >= 0) {
+          if (new MetadataVersion(parquetTableMetadata.getMetadataVersion()).isAtLeast(3, 0)) {
             ((Metadata_V3.ParquetTableMetadata_v3) parquetTableMetadata).updateRelativePaths(metadataParentDirPath);
           }
           if (!alreadyCheckedModification && tableModified((parquetTableMetadata.getDirectories()), path, metadataParentDir, metaContext, fs)) {
