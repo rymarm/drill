@@ -49,7 +49,6 @@ public class HiveDrillNativeParquetRowGroupScan extends AbstractParquetRowGroupS
   private final HiveStoragePluginConfig hiveStoragePluginConfig;
   private final HivePartitionHolder hivePartitionHolder;
   private final Map<String, String> confProperties;
-  private final TupleSchema tupleSchema;
 
   @JsonCreator
   public HiveDrillNativeParquetRowGroupScan(@JacksonInject StoragePluginRegistry registry,
@@ -61,7 +60,7 @@ public class HiveDrillNativeParquetRowGroupScan extends AbstractParquetRowGroupS
                                             @JsonProperty("confProperties") Map<String, String> confProperties,
                                             @JsonProperty("readerConfig") ParquetReaderConfig readerConfig,
                                             @JsonProperty("filter") LogicalExpression filter,
-                                            @JsonProperty("tupleScema") TupleSchema tupleSchema) throws ExecutionSetupException {
+                                            @JsonProperty("tupleSchema") TupleSchema tupleSchema) throws ExecutionSetupException {
     this(userName,
         (HiveStoragePlugin) registry.getPlugin(hiveStoragePluginConfig),
         rowGroupReadEntries,
@@ -87,7 +86,6 @@ public class HiveDrillNativeParquetRowGroupScan extends AbstractParquetRowGroupS
     this.hiveStoragePluginConfig = hiveStoragePlugin.getConfig();
     this.hivePartitionHolder = hivePartitionHolder;
     this.confProperties = confProperties;
-    this.tupleSchema = tupleSchema;
   }
 
   @JsonProperty
