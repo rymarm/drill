@@ -17,7 +17,6 @@
  */
 package org.apache.drill.test;
 
-import java.util.Collection;
 import java.util.Properties;
 import java.util.Map.Entry;
 
@@ -30,6 +29,7 @@ import org.apache.drill.common.map.CaseInsensitiveMap;
 import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.server.options.OptionDefinition;
 import org.apache.drill.exec.server.options.SystemOptionManager;
+import org.apache.drill.shaded.guava.com.google.common.primitives.Primitives;
 
 /**
  * Builds a {@link DrillConfig} for use in tests. Use this when a config
@@ -130,10 +130,10 @@ public class ConfigBuilder {
       configProps = createDefaultProperties();
     }
 
-    if (value instanceof Collection) {
-      configProps.put(key, value);
-    } else {
+    if (value instanceof  String || Primitives.isWrapperType(value.getClass())) {
       configProps.put(key, value.toString());
+    } else {
+      configProps.put(key, value);
     }
 
     return this;
@@ -177,12 +177,14 @@ public class ConfigBuilder {
     Properties stringProps = new Properties();
     Properties collectionProps = new Properties();
 
-    // Filter out the collection type configs and other configs which can be converted to string.
-    for(Entry<Object, Object> entry : configProps.entrySet()) {
-      if(entry.getValue() instanceof Collection<?>) {
-        collectionProps.put(entry.getKey(), entry.getValue());
+    // Filter out the collection type configs and other configs
+    // which can be converted to string.
+    for (Entry<Object, Object> entry : configProps.entrySet()) {
+      Object value = entry.getValue();
+      if (value instanceof String || Primitives.isWrapperType(value.getClass())) {
+        stringProps.setProperty(entry.getKey().toString(), value.toString());
       } else {
-        stringProps.setProperty(entry.getKey().toString(), entry.getValue().toString());
+        collectionProps.put(entry.getKey(), value);
       }
     }
 
