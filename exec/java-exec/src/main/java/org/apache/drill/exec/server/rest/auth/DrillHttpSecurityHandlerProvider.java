@@ -17,6 +17,7 @@
  */
 package org.apache.drill.exec.server.rest.auth;
 
+import org.apache.drill.exec.server.rest.header.ResponseHeadersSettingFilter;
 import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 import org.apache.drill.common.config.DrillConfig;
 import org.apache.drill.common.exceptions.DrillException;
@@ -52,10 +53,13 @@ public class DrillHttpSecurityHandlerProvider extends ConstraintSecurityHandler 
   private final Map<String, DrillHttpConstraintSecurityHandler> securityHandlers =
       CaseInsensitiveMap.newHashMapWithExpectedSize(2);
 
+  private final Map<String, String> responseHeaders;
+
   public DrillHttpSecurityHandlerProvider(DrillConfig config, DrillbitContext drillContext)
       throws DrillbitStartupException {
 
     Preconditions.checkState(config.getBoolean(ExecConstants.USER_AUTHENTICATION_ENABLED));
+    this.responseHeaders = ResponseHeadersSettingFilter.retrieveResponseHeaders(config);
     final Set<String> configuredMechanisms = getHttpAuthMechanisms(config);
 
     final ScanResult scan = drillContext.getClasspathScan();
@@ -118,7 +122,7 @@ public class DrillHttpSecurityHandlerProvider extends ConstraintSecurityHandler 
       throws IOException, ServletException {
 
     Preconditions.checkState(securityHandlers.size() > 0);
-
+    responseHeaders.forEach(response::setHeader);
     HttpSession session = request.getSession(true);
     SessionAuthentication authentication =
         (SessionAuthentication) session.getAttribute(SessionAuthentication.__J_AUTHENTICATED);
