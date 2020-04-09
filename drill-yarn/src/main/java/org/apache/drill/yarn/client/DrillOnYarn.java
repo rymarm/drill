@@ -17,6 +17,8 @@
  */
 package org.apache.drill.yarn.client;
 
+import org.apache.drill.exec.util.GuavaPatcher;
+import org.apache.drill.exec.util.ProtobufPatcher;
 import org.apache.drill.yarn.core.DoyConfigException;
 import org.apache.drill.yarn.core.DrillOnYarnConfig;
 import org.apache.log4j.BasicConfigurator;
@@ -72,6 +74,20 @@ import org.apache.log4j.BasicConfigurator;
  */
 
 public class DrillOnYarn {
+
+  static {
+    /*
+     * Drill-on-YARN uses Hadoop dependencies that use older version of protobuf,
+     * and override some methods that became final in recent protobuf versions.
+     * This code removes these final modifiers.
+     */
+    ProtobufPatcher.patch();
+    /*
+     * Some libraries, such as Hadoop or HBase, depend on incompatible versions of Guava.
+     * This code adds back some methods to so that the libraries can work with single Guava version.
+     */
+    GuavaPatcher.patch();
+  }
 
   public static void main(String argv[]) {
     BasicConfigurator.configure();
