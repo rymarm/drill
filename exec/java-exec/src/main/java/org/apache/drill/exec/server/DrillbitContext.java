@@ -27,6 +27,7 @@ import org.apache.drill.exec.coord.ClusterCoordinator;
 import org.apache.drill.exec.expr.fn.FunctionImplementationRegistry;
 import org.apache.drill.exec.expr.fn.registry.RemoteFunctionRegistry;
 import org.apache.drill.exec.memory.BufferAllocator;
+import org.apache.drill.exec.metrics.DrillCounters;
 import org.apache.drill.exec.physical.impl.OperatorCreatorRegistry;
 import org.apache.drill.exec.planner.PhysicalPlanReader;
 import org.apache.drill.exec.planner.sql.DrillOperatorTable;
@@ -74,6 +75,7 @@ public class DrillbitContext implements AutoCloseable {
   private final DrillOperatorTable table;
   private final QueryProfileStoreContext profileStoreContext;
   private ResourceManager resourceManager;
+  private final DrillCounters counters;
 
   public DrillbitContext(
       DrillbitEndpoint endpoint,
@@ -120,7 +122,9 @@ public class DrillbitContext implements AutoCloseable {
     table = new DrillOperatorTable(functionRegistry, systemOptions);
 
     //This profile store context is built from the profileStoreProvider
-    profileStoreContext = new QueryProfileStoreContext(context.getConfig(), profileStoreProvider, coord);
+    profileStoreContext = new QueryProfileStoreContext(config, profileStoreProvider, coord);
+
+    this.counters = DrillCounters.getInstance();
   }
 
   public QueryProfileStoreContext getProfileStoreContext() {
@@ -300,5 +304,9 @@ public class DrillbitContext implements AutoCloseable {
 
   public ResourceManager getResourceManager() {
     return resourceManager;
+  }
+
+  public DrillCounters getCounters() {
+    return counters;
   }
 }
