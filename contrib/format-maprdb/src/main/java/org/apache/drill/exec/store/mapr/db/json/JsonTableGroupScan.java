@@ -18,6 +18,7 @@
 package org.apache.drill.exec.store.mapr.db.json;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -65,7 +66,6 @@ import org.apache.drill.exec.util.Utilities;
 import org.apache.drill.exec.physical.base.FileSystemMetadataProviderManager;
 import org.apache.drill.exec.physical.base.MetadataProviderManager;
 import org.apache.drill.exec.physical.base.TableMetadataProvider;
-import org.codehaus.jackson.annotate.JsonCreator;
 import org.ojai.store.QueryCondition;
 
 import java.io.IOException;
