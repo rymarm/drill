@@ -35,7 +35,7 @@ jobs:
         # TODO: Could be removed, once Machine Executor image is updated https://github.com/circleci/image-builder/issues/140
         # and the possibility of specifying Maven version is added https://github.com/circleci/image-builder/issues/143
         command:
-          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.0
+          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.3
     - run:
         name: Update packages list
         command:
@@ -92,7 +92,7 @@ jobs:
     - run:
         name: Update maven version
         command:
-          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.0
+          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.3
     - run:
         name: Install libaio1.so library for MySQL integration tests
         command:
@@ -144,7 +144,7 @@ jobs:
     - run:
         name: Update maven version
         command:
-          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.0
+          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.3
     - run:
         name: Install libaio1.so library for MySQL integration tests
         command:
@@ -196,7 +196,7 @@ jobs:
     - run:
         name: Update maven version
         command:
-          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.0
+          curl -fsSL https://git.io/vpDIf | bash -s -- 3.6.3
     - run:
         name: Install libaio1.so library for MySQL integration tests
         command:
