@@ -351,6 +351,7 @@
             <exclude>**/*.log</exclude>
             <exclude>**/*.css</exclude>
             <exclude>**/*.js</exclude>
+            <exclude>**/*.map</exclude>
             <exclude>**/*.md</exclude>
             <exclude>**/*.eps</exclude>
             <exclude>**/*.json</exclude>
@@ -621,6 +622,7 @@
               <exclude>**/*.log</exclude>
               <exclude>**/*.css</exclude>
               <exclude>**/*.js</exclude>
+              <exclude>**/*.map</exclude>
               <exclude>**/*.md</exclude>
               <exclude>**/*.eps</exclude>
               <exclude>**/*.json</exclude>
