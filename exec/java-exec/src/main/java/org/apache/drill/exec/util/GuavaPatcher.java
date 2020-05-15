@@ -105,87 +105,92 @@ public class GuavaPatcher {
       ClassPool cp = getClassPool();
       CtClass cc = cp.get("com.google.common.base.Preconditions");
 
-      // Javassist does not support varargs, generate methods with varying number of arguments
-      int startIndex = 1;
-      int endIndex = 5;
+      // in newer version of guava was removed format method and added methods introduced below,
+      // so patching should be done only if this method is present
+      if (cc.getDeclaredMethods("format").length > 0) {
 
-      List<String> methodsWithVarargsTemplates = Arrays.asList(
-          "public static void checkArgument(boolean expression, String errorMessageTemplate, %s) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { %s }));\n"
-              + "    }\n"
-              + "  }",
+        // Javassist does not support varargs, generate methods with varying number of arguments
+        int startIndex = 1;
+        int endIndex = 5;
 
-          "public static Object checkNotNull(Object reference, String errorMessageTemplate, %s) {\n"
-              + "    if (reference == null) {\n"
-              + "      throw new NullPointerException(format(errorMessageTemplate, new Object[] { %s }));\n"
-              + "    } else {\n"
-              + "      return reference;\n"
-              + "    }\n"
-              + "  }",
+        List<String> methodsWithVarargsTemplates = Arrays.asList(
+            "public static void checkArgument(boolean expression, String errorMessageTemplate, %s) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { %s }));\n"
+                + "    }\n"
+                + "  }",
 
-          "public static void checkState(boolean expression, String errorMessageTemplate, %s) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalStateException(format(errorMessageTemplate, new Object[] { %s }));\n"
-              + "    }\n"
-              + "  }"
-      );
+            "public static Object checkNotNull(Object reference, String errorMessageTemplate, %s) {\n"
+                + "    if (reference == null) {\n"
+                + "      throw new NullPointerException(format(errorMessageTemplate, new Object[] { %s }));\n"
+                + "    } else {\n"
+                + "      return reference;\n"
+                + "    }\n"
+                + "  }",
 
-      List<String> methodsWithPrimitives = Arrays.asList(
-          "public static void checkArgument(boolean expression, String errorMessageTemplate, int arg1) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
-              + "    }\n"
-              + "  }",
-          "public static void checkArgument(boolean expression, String errorMessageTemplate, long arg1) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Long(arg1) }));\n"
-              + "    }\n"
-              + "  }",
-          "public static void checkArgument(boolean expression, String errorMessageTemplate, long arg1, long arg2) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Long(arg1), new Long(arg2)}));\n"
-              + "    }\n"
-              + "  }",
-          "public static Object checkNotNull(Object reference, String errorMessageTemplate, int arg1) {\n"
-              + "    if (reference == null) {\n"
-              + "      throw new NullPointerException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
-              + "    } else {\n"
-              + "      return reference;\n"
-              + "    }\n"
-              + "  }",
-          "public static void checkState(boolean expression, String errorMessageTemplate, int arg1) {\n"
-              + "    if (!expression) {\n"
-              + "      throw new IllegalStateException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
-              + "    }\n"
-              + "  }"
-      );
+            "public static void checkState(boolean expression, String errorMessageTemplate, %s) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalStateException(format(errorMessageTemplate, new Object[] { %s }));\n"
+                + "    }\n"
+                + "  }"
+        );
 
-      List<String> newMethods = IntStream.rangeClosed(startIndex, endIndex)
-          .mapToObj(
-              i -> {
-                List<String> args = IntStream.rangeClosed(startIndex, i)
-                    .mapToObj(j -> "arg" + j)
-                    .collect(Collectors.toList());
+        List<String> methodsWithPrimitives = Arrays.asList(
+            "public static void checkArgument(boolean expression, String errorMessageTemplate, int arg1) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
+                + "    }\n"
+                + "  }",
+            "public static void checkArgument(boolean expression, String errorMessageTemplate, long arg1) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Long(arg1) }));\n"
+                + "    }\n"
+                + "  }",
+            "public static void checkArgument(boolean expression, String errorMessageTemplate, long arg1, long arg2) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalArgumentException(format(errorMessageTemplate, new Object[] { new Long(arg1), new Long(arg2)}));\n"
+                + "    }\n"
+                + "  }",
+            "public static Object checkNotNull(Object reference, String errorMessageTemplate, int arg1) {\n"
+                + "    if (reference == null) {\n"
+                + "      throw new NullPointerException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
+                + "    } else {\n"
+                + "      return reference;\n"
+                + "    }\n"
+                + "  }",
+            "public static void checkState(boolean expression, String errorMessageTemplate, int arg1) {\n"
+                + "    if (!expression) {\n"
+                + "      throw new IllegalStateException(format(errorMessageTemplate, new Object[] { new Integer(arg1) }));\n"
+                + "    }\n"
+                + "  }"
+        );
 
-                String methodInput = args.stream()
-                    .map(arg -> "Object " + arg)
-                    .collect(Collectors.joining(", "));
+        List<String> newMethods = IntStream.rangeClosed(startIndex, endIndex)
+            .mapToObj(
+                i -> {
+                  List<String> args = IntStream.rangeClosed(startIndex, i)
+                      .mapToObj(j -> "arg" + j)
+                      .collect(Collectors.toList());
 
-                String arrayInput = String.join(", ", args);
+                  String methodInput = args.stream()
+                      .map(arg -> "Object " + arg)
+                      .collect(Collectors.joining(", "));
 
-                return methodsWithVarargsTemplates.stream()
-                    .map(method -> String.format(method, methodInput, arrayInput))
-                    .collect(Collectors.toList());
-              })
-          .flatMap(Collection::stream)
-          .collect(Collectors.toList());
+                  String arrayInput = String.join(", ", args);
 
-      newMethods.addAll(methodsWithPrimitives);
+                  return methodsWithVarargsTemplates.stream()
+                      .map(method -> String.format(method, methodInput, arrayInput))
+                      .collect(Collectors.toList());
+                })
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
-      for (String method : newMethods) {
-        CtMethod newMethod = CtNewMethod.make(method, cc);
-        cc.addMethod(newMethod);
+        newMethods.addAll(methodsWithPrimitives);
+
+        for (String method : newMethods) {
+          CtMethod newMethod = CtNewMethod.make(method, cc);
+          cc.addMethod(newMethod);
+        }
       }
 
       cc.toClass();
