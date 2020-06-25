@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.directory.api.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.drill.common.map.CaseInsensitiveMap;
 import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.physical.impl.scan.project.ColumnProjection;
@@ -178,7 +178,7 @@ public class FileMetadataManager implements MetadataManager, ReaderProjectionRes
     partitionDesignator = optionManager.getString(ExecConstants.FILESYSTEM_PARTITION_COLUMN_LABEL);
     for (ImplicitFileColumns e : ImplicitFileColumns.values()) {
       String colName = optionManager.getString(e.optionName());
-      if (! Strings.isEmpty(colName)) {
+      if (StringUtils.isNotEmpty(colName)) {
         FileMetadataColumnDefn defn = new FileMetadataColumnDefn(colName, e);
         implicitColDefns.add(defn);
         fileMetadataColIndex.put(defn.colName, defn);
