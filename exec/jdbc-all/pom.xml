@@ -341,6 +341,7 @@
               <exclude>commons-beanutils:commons-beanutils-core:jar:*</exclude>
               <exclude>commons-beanutils:commons-beanutils:jar:*</exclude>
               <exclude>io.netty:netty-tcnative:jar:*</exclude>
+              <exclude>com.fasterxml.woodstox:woodstox-core:jar:*</exclude>
             </excludes>
           </artifactSet>
           <relocations>
@@ -404,6 +405,7 @@
             <relocation><pattern>org.apache.xpath.</pattern><shadedPattern>oadd.org.apache.xpath.</shadedPattern></relocation>
             <relocation><pattern>org.apache.zookeeper.</pattern><shadedPattern>oadd.org.apache.zookeeper.</shadedPattern></relocation>
             <relocation><pattern>org.apache.hadoop.</pattern><shadedPattern>oadd.org.apache.hadoop.</shadedPattern></relocation>
+            <relocation><pattern>com.fasterxml.woodstox.</pattern><shadedPattern>oadd.com.fasterxml.woodstox.</shadedPattern></relocation>
           </relocations>
           <transformers>
             <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
