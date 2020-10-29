@@ -49,7 +49,7 @@
     <shaded.guava.version>23.0</shaded.guava.version>
     <guava.version>19.0</guava.version>
     <forkCount>2</forkCount>
-    <parquet.version>1.10.0</parquet.version>
+    <parquet.version>1.11.0</parquet.version>
     <!--
       For development purposes to be able to use custom Calcite versions (e.g. not present in jitpack
       repository or from local repository) update this property to desired value (e.g. org.apache.calcite).
@@ -61,8 +61,7 @@
     <avatica.version>1.13.0</avatica.version>
     <janino.version>3.0.11</janino.version>
     <sqlline.version>1.7.0</sqlline.version>
-    <jackson.version>2.9.5</jackson.version>
-    <jackson.databind.version>2.9.5</jackson.databind.version>
+    <jackson.version>2.10.3</jackson.version>
     <zookeeper.version>3.4.12</zookeeper.version>
     <mapr.release.version>6.1.0-mapr</mapr.release.version>
     <ojai.version>3.0-mapr-1808</ojai.version>
@@ -73,7 +72,7 @@
     <junit.version>4.11</junit.version>
     <hamcrest.core.version>1.3</hamcrest.core.version>
     <maven.embedder.version>3.5.3</maven.embedder.version>
-    <curator.version>2.7.1</curator.version>
+    <curator.version>4.3.0</curator.version>
     <wiremock.standalone.version>2.5.1</wiremock.standalone.version>
     <jmockit.version>1.43</jmockit.version>
     <logback.version>1.0.13</logback.version>
@@ -83,14 +82,14 @@
       Apache Hive 2.3.2. If the version is changed, make sure the jars and their dependencies are updated.
     -->
     <hive.version>2.3.2</hive.version>
-    <hadoop.version>2.7.4</hadoop.version>
-    <hbase.version>2.1.1</hbase.version>
+    <hadoop.version>3.0.3</hadoop.version>
+    <hbase.version>2.1.4</hbase.version>
     <fmpp.version>1.0</fmpp.version>
     <freemarker.version>2.3.28</freemarker.version>
     <javassist.version>3.24.0-GA</javassist.version>
     <msgpack.version>0.6.6</msgpack.version>
     <reflections.version>0.9.10</reflections.version>
-    <avro.version>1.8.2</avro.version>
+    <avro.version>1.9.0</avro.version>
     <metrics.version>4.0.2</metrics.version>
     <jetty.version>9.3.25.v20180904</jetty.version>
     <jersey.version>2.25.1</jersey.version>
@@ -509,7 +508,7 @@
               <rules>
                 <bannedDependencies>
                   <excludes>
-                    <exclude>commons-logging</exclude>
+                    <!--<exclude>commons-logging</exclude>-->
                     <exclude>javax.servlet:servlet-api</exclude>
                     <exclude>org.mortbay.jetty:servlet-api</exclude>
                     <exclude>org.mortbay.jetty:servlet-api-2.5</exclude>
@@ -1001,9 +1000,16 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.0.13</version>
+      <version>${logback.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>${logback.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>de.huxhorn.lilith</groupId>
       <artifactId>de.huxhorn.lilith.logback.appender.multiplex-classic</artifactId>
@@ -1049,6 +1055,26 @@
   <!-- Managed Dependencies -->
   <dependencyManagement>
     <dependencies>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>${dep.slf4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jul-to-slf4j</artifactId>
+          <version>${dep.slf4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+          <version>${dep.slf4j.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>log4j-over-slf4j</artifactId>
+          <version>${dep.slf4j.version}</version>
+      </dependency>
       <dependency>
         <groupId>${calcite.groupId}</groupId>
         <artifactId>calcite-core</artifactId>
@@ -1467,7 +1493,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson.databind.version}</version>
+        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
@@ -1634,7 +1660,7 @@
       <dependency>
         <groupId>org.apache.parquet</groupId>
         <artifactId>parquet-format</artifactId>
-        <version>2.5.0</version>
+        <version>2.8.0</version>
         <exclusions>
           <exclusion>
             <groupId>org.apache.hadoop</groupId>
@@ -1902,14 +1928,14 @@
                 <artifactId>mockito-all</artifactId>
                 <groupId>org.mockito</groupId>
               </exclusion>
-              <exclusion>
-                <artifactId>commons-logging-api</artifactId>
-                <groupId>commons-logging</groupId>
-              </exclusion>
-              <exclusion>
-                <artifactId>commons-logging</artifactId>
-                <groupId>commons-logging</groupId>
-              </exclusion>
+              <!--<exclusion>-->
+                <!--<artifactId>commons-logging-api</artifactId>-->
+                <!--<groupId>commons-logging</groupId>-->
+              <!--</exclusion>-->
+              <!--<exclusion>-->
+                <!--<artifactId>commons-logging</artifactId>-->
+                <!--<groupId>commons-logging</groupId>-->
+              <!--</exclusion>-->
               <exclusion>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-core</artifactId>
@@ -1952,6 +1978,7 @@
               </exclusion>
             </exclusions>
           </dependency>
+          <!-- Hadoop Test Dependencies -->
           <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
@@ -2051,6 +2078,76 @@
           </dependency>
           <dependency>
             <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs</artifactId>
+            <version>${hadoop.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+            <exclusions>
+              <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>com.sun.jersey</groupId>
+                <artifactId>jersey-core</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <!-- Hadoop Test Dependencies -->
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
             <exclusions>
@@ -2141,6 +2238,14 @@
               <exclusion>
                   <groupId>io.netty</groupId>
                   <artifactId>netty</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
               </exclusion>
             </exclusions>
           </dependency>
@@ -2557,74 +2662,6 @@
             <version>${jersey.version}</version>
           </dependency>
           <!--/GlassFish Jersey dependecies-->
-
-          <!-- Test Dependencies -->
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>test</scope>
-            <exclusions>
-              <exclusion>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>servlet-api</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>io.netty</groupId>
-                <artifactId>netty</artifactId>
-              </exclusion>
-            </exclusions>
-          </dependency>
-          <!-- Test Dependencies -->
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-            <exclusions>
-              <exclusion>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>servlet-api</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>com.sun.jersey</groupId>
-                <artifactId>jersey-core</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>io.netty</groupId>
-                  <artifactId>netty</artifactId>
-              </exclusion>
-            </exclusions>
-          </dependency>
         </dependencies>
       </dependencyManagement>
     </profile>
@@ -2636,6 +2673,7 @@
         <hbase.version>1.1.1-mapr-1602-m7-5.2.0</hbase.version>
         <hadoop.version>2.7.0-mapr-1808</hadoop.version>
         <zookeeper.version>3.4.11-mapr-1808</zookeeper.version>
+        <curator.test.version>2.13.0</curator.test.version>
       </properties>
       <dependencyManagement>
         <dependencies>
@@ -2968,6 +3006,18 @@
                   <groupId>io.netty</groupId>
                   <artifactId>netty</artifactId>
               </exclusion>
+              <exclusion>
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+              </exclusion>
             </exclusions>
           </dependency>
           <dependency>
@@ -3042,6 +3092,14 @@
               <exclusion>
                 <groupId>com.sun.jersey</groupId>
                 <artifactId>jersey-client</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
               </exclusion>
             </exclusions>
           </dependency>
@@ -3158,6 +3216,18 @@
               <exclusion>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-annotations</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <version>${curator.test.version}</version>
+            <scope>test</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
               </exclusion>
             </exclusions>
           </dependency>

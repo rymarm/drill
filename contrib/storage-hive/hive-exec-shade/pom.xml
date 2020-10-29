@@ -153,6 +153,12 @@
                 <exclude>org/apache/parquet/schema/*</exclude>
               </excludes>
             </filter>
+            <filter>
+              <artifact>com.fasterxml.jackson.core:*</artifact>
+              <excludes>
+                <exclude>module-info.class</exclude>
+              </excludes>
+            </filter>
           </filters>
         </configuration>
       </plugin>

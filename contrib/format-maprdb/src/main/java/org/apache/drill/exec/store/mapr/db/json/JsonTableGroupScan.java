@@ -65,7 +65,7 @@ import org.apache.drill.exec.util.Utilities;
 import org.apache.drill.exec.physical.base.FileSystemMetadataProviderManager;
 import org.apache.drill.exec.physical.base.MetadataProviderManager;
 import org.apache.drill.exec.physical.base.TableMetadataProvider;
-import org.codehaus.jackson.annotate.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.ojai.store.QueryCondition;
 
 import java.io.IOException;
