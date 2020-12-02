@@ -111,7 +111,6 @@
     <protobuf.version>3.11.1</protobuf.version>
     <commons.compress.version>1.20</commons.compress.version>
     <httpclient.version>4.5.12</httpclient.version>
-    <libthrift.version>0.13.0</libthrift.version>
     <derby.version>10.14.2.0</derby.version>
     <commons.cli.version>1.4</commons.cli.version>
     <snakeyaml.version>1.26</snakeyaml.version>
@@ -1857,11 +1856,6 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>${httpclient.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.thrift</groupId>
-        <artifactId>libthrift</artifactId>
-        <version>${libthrift.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.derby</groupId>
