@@ -110,6 +110,7 @@
     <commons.beanutils.version>1.9.4</commons.beanutils.version>
     <snakeyaml.version>1.26</snakeyaml.version>
     <libthrift.version>0.13.0</libthrift.version>
+    <spring.version>5.0.19.RELEASE</spring.version>
   </properties>
 
   <scm>
@@ -1828,6 +1829,36 @@
         <groupId>org.apache.thrift</groupId>
         <artifactId>libthrift</artifactId>
         <version>${libthrift.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>${spring.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
