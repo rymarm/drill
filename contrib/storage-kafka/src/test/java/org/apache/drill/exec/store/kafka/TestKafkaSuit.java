@@ -17,16 +17,23 @@
  */
 package org.apache.drill.exec.store.kafka;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.ZkConnection;
 import org.apache.drill.categories.KafkaStorageTest;
 import org.apache.drill.categories.SlowTest;
 import org.apache.drill.exec.ZookeeperTestUtil;
 import org.apache.drill.exec.store.kafka.cluster.EmbeddedKafkaCluster;
 import org.apache.drill.exec.store.kafka.decoders.MessageReaderFactoryTest;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.security.JaasUtils;
@@ -40,10 +47,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import kafka.admin.AdminUtils;
-import kafka.admin.RackAwareMode;
 import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
 
 @Category({KafkaStorageTest.class, SlowTest.class})
 @RunWith(Suite.class)
@@ -71,17 +75,9 @@ public class TestKafkaSuit {
         ZookeeperTestUtil.setZookeeperSaslTestConfigProps();
         System.setProperty(JaasUtils.JAVA_LOGIN_CONFIG_PARAM, ClassLoader.getSystemResource(LOGIN_CONF_RESOURCE_PATHNAME).getFile());
         embeddedKafkaCluster = new EmbeddedKafkaCluster();
-        Properties topicProps = new Properties();
         zkClient = new ZkClient(embeddedKafkaCluster.getZkServer().getConnectionString(), SESSION_TIMEOUT, CONN_TIMEOUT, ZKStringSerializer$.MODULE$);
-        ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(embeddedKafkaCluster.getZkServer().getConnectionString()), false);
-        AdminUtils.createTopic(zkUtils, TestQueryConstants.JSON_TOPIC, 1, 1, topicProps, RackAwareMode.Disabled$.MODULE$);
-
-        org.apache.kafka.common.requests.MetadataResponse.TopicMetadata fetchTopicMetadataFromZk = AdminUtils
-            .fetchTopicMetadataFromZk(TestQueryConstants.JSON_TOPIC, zkUtils);
-        logger.info("Topic Metadata: " + fetchTopicMetadataFromZk);
-
-        KafkaMessageGenerator generator = new KafkaMessageGenerator(embeddedKafkaCluster.getKafkaBrokerList(),
-            StringSerializer.class);
+        createTopicHelper(TestQueryConstants.JSON_TOPIC, 1);
+        KafkaMessageGenerator generator = new KafkaMessageGenerator(embeddedKafkaCluster.getKafkaBrokerList(), StringSerializer.class);
         generator.populateJsonMsgIntoKafka(TestQueryConstants.JSON_TOPIC, NUM_JSON_MSG);
       }
       initCount.incrementAndGet();
@@ -108,19 +104,21 @@ public class TestKafkaSuit {
     }
   }
 
-  public static void createTopicHelper(final String topicName, final int partitions) {
-
-    Properties topicProps = new Properties();
-    topicProps.put(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG, "CreateTime");
-    topicProps.put(TopicConfig.RETENTION_MS_CONFIG, "-1");
-    ZkUtils zkUtils = new ZkUtils(zkClient,
-        new ZkConnection(embeddedKafkaCluster.getZkServer().getConnectionString()), false);
-    AdminUtils.createTopic(zkUtils, topicName, partitions, 1,
-        topicProps, RackAwareMode.Disabled$.MODULE$);
-
-    org.apache.kafka.common.requests.MetadataResponse.TopicMetadata fetchTopicMetadataFromZk =
-        AdminUtils.fetchTopicMetadataFromZk(topicName, zkUtils);
-    logger.info("Topic Metadata: " + fetchTopicMetadataFromZk);
+  public static void createTopicHelper(String topicName, int partitions) throws ExecutionException, InterruptedException {
+    try (AdminClient adminClient = initAdminClient()) {
+      NewTopic newTopic = new NewTopic(topicName, partitions, (short) 1);
+      Map<String, String> topicConfigs = new HashMap<>();
+      topicConfigs.put(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG, "CreateTime");
+      topicConfigs.put(TopicConfig.RETENTION_MS_CONFIG, "-1");
+      newTopic.configs(topicConfigs);
+      CreateTopicsResult result = adminClient.createTopics(Collections.singletonList(newTopic));
+      result.all().get();
+    }
   }
 
+  private static AdminClient initAdminClient() {
+    Properties props = new Properties();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, embeddedKafkaCluster.getKafkaBrokerList());
+    return AdminClient.create(props);
+  }
 }
