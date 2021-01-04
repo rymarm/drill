@@ -72,13 +72,15 @@ public abstract class FilterTemplate2 implements Filterer {
     case NONE:
       // Set the actual recordCount in outgoing selection vector to help SVRemover copy the entire
       // batch if possible at once rather than row-by-row
-      outgoingSelectionVector.setBatchActualRecordCount(recordCount);
+      // TODO: Fix improvement below to make it work with case MD-6096
+      //outgoingSelectionVector.setBatchActualRecordCount(recordCount);
       filterBatchNoSV(recordCount);
       break;
     case TWO_BYTE:
       // Set the actual recordCount in outgoing selection vector to help SVRemover copy the entire
       // batch if possible at once rather than row-by-row
-      outgoingSelectionVector.setBatchActualRecordCount(incomingSelectionVector.getBatchActualRecordCount());
+      // TODO: Fix improvement below to make it work with case MD-6096
+      //outgoingSelectionVector.setBatchActualRecordCount(incomingSelectionVector.getBatchActualRecordCount());
       filterBatchSV2(recordCount);
       break;
     default:
