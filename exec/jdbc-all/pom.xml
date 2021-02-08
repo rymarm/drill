@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.drill.exec</groupId>
     <artifactId>exec-parent</artifactId>
-    <version>1.16.1.100-mapr</version>
+    <version>1.16.1.100-mapr-SNAPSHOT</version>
   </parent>
 
   <artifactId>drill-jdbc-all</artifactId>
