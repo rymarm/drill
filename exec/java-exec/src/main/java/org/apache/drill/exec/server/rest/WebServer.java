@@ -49,10 +49,8 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -268,17 +266,20 @@ public class WebServer implements AutoCloseable {
   }
 
   /**
-   * It creates A {@link SessionHandler} which contains a {@link HashSessionManager}
+   * It creates a {@link SessionHandler} with a {@link org.eclipse.jetty.server.session.DefaultSessionCache}
+   * which has {@link org.eclipse.jetty.server.session.NullSessionDataStore}.
+   *
+   * All sessions are stored in memory and on server restart are all destroyed.
    *
    * @param securityHandler Set of init parameters that are used by the Authentication
    * @return session handler
    */
   private SessionHandler createSessionHandler(final SecurityHandler securityHandler) {
-    SessionManager sessionManager = new HashSessionManager();
-    sessionManager.setMaxInactiveInterval(config.getInt(ExecConstants.HTTP_SESSION_MAX_IDLE_SECS));
+    SessionHandler sessionHandler = new SessionHandler();
+    sessionHandler.setMaxInactiveInterval(config.getInt(ExecConstants.HTTP_SESSION_MAX_IDLE_SECS));
     // response cookie will be returned with HttpOnly flag
-    sessionManager.getSessionCookieConfig().setHttpOnly(true);
-    sessionManager.addEventListener(new HttpSessionListener() {
+    sessionHandler.getSessionCookieConfig().setHttpOnly(true);
+    sessionHandler.addEventListener(new HttpSessionListener() {
       @Override
       public void sessionCreated(HttpSessionEvent se) {
 
@@ -309,7 +310,7 @@ public class WebServer implements AutoCloseable {
       }
     });
 
-    return new SessionHandler(sessionManager);
+    return sessionHandler;
   }
 
   public int getPort() {
