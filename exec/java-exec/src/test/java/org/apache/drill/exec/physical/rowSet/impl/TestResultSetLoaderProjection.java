@@ -587,5 +587,4 @@ public class TestResultSetLoaderProjection extends SubOperatorTest {
       assertTrue(e.getErrorType() == ErrorType.VALIDATION);
     }
   }
-  /* Conflicts with tests*/
 }

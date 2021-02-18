@@ -19,7 +19,6 @@ package org.apache.drill.exec.record.metadata;
 
 import org.apache.drill.common.types.TypeProtos;
 import org.apache.drill.common.types.Types;
-import org.apache.drill.exec.record.SchemaBuilder;
 import org.apache.drill.exec.vector.complex.DictVector;
 
 
@@ -230,7 +229,7 @@ public class DictBuilder implements SchemaContainer {
     }
   }
 
-  public org.apache.drill.exec.record.SchemaBuilder resumeSchema() {
+  public SchemaBuilder resumeSchema() {
     build();
     return (SchemaBuilder) parent;
   }

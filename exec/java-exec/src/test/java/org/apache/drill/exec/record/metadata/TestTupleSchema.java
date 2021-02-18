@@ -822,5 +822,58 @@ public class TestTupleSchema extends SubOperatorTest {
       // Expected
     }
   }
-  /* Conflicts with tests */
+
+  @Test
+  public void testDictColumn() {
+    MaterializedField field = SchemaBuilder.columnSchema("d", MinorType.DICT, DataMode.REQUIRED);
+    ColumnMetadata col = MetadataUtils.fromField(field);
+
+    assertTrue(col instanceof DictColumnMetadata);
+    assertNotNull(col.tupleSchema());
+    assertEquals(0, col.tupleSchema().size());
+    assertSame(col, col.tupleSchema().parent());
+
+    DictColumnMetadata dictCol = (DictColumnMetadata) col;
+    assertNull(dictCol.parentTuple());
+
+    assertEquals(ColumnMetadata.StructureType.DICT, col.structureType());
+    assertFalse(col.isNullable());
+    assertFalse(col.isArray());
+    assertFalse(col.isVariableWidth());
+    assertTrue(col.isDict());
+    assertFalse(col.isVariant());
+
+    assertEquals(0, col.expectedWidth());
+    col.setExpectedWidth(10);
+    assertEquals(0, col.expectedWidth());
+
+    assertEquals(1, col.expectedElementCount());
+    col.setExpectedElementCount(2);
+    assertEquals(1, col.expectedElementCount());
+  }
+
+  @Test
+  public void testRepeatedDictColumn() {
+    MaterializedField field = SchemaBuilder.columnSchema("da", MinorType.DICT, DataMode.REPEATED);
+    ColumnMetadata col = MetadataUtils.fromField(field);
+
+    assertTrue(col instanceof DictColumnMetadata);
+    assertNotNull(col.tupleSchema());
+    assertEquals(0, col.tupleSchema().size());
+
+    assertFalse(col.isNullable());
+    assertTrue(col.isArray());
+    assertFalse(col.isVariableWidth());
+    assertTrue(col.isDict());
+    assertFalse(col.isVariant());
+
+    assertEquals(0, col.expectedWidth());
+    col.setExpectedWidth(10);
+    assertEquals(0, col.expectedWidth());
+
+    assertEquals(ColumnMetadata.DEFAULT_ARRAY_SIZE, col.expectedElementCount());
+
+    col.setExpectedElementCount(2);
+    assertEquals(2, col.expectedElementCount());
+  }
 }
