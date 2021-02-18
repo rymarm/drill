@@ -46,8 +46,7 @@ public class SchemaPathUtils {
     ColumnMetadata colMetadata = schema.metadata(colPath.getPath());
     while (!colPath.isLastPath() && colMetadata != null) {
       if (colMetadata.isDict()) {
-        // get dict's value field metadata
-        colMetadata = colMetadata.tupleSchema().metadata(0).tupleSchema().metadata(1);
+        colMetadata = ((DictColumnMetadata) colMetadata).valueColumnMetadata();
         break;
       }
       if (!colMetadata.isMap()) {

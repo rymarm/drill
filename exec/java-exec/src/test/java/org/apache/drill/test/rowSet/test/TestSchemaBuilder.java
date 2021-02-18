@@ -284,18 +284,22 @@ public class TestSchemaBuilder extends DrillTest {
    * Tests creating a dict within a row.
    * Also the basic dict add key and value columns methods.
    */
-  /*
-  Fix test conflicts
 
   @Test
 
   public void testDictInRow() {
 
-    BatchSchema schema = new SchemaBuilder()
-        .addDict("d", MinorType.VARCHAR)
+    TupleMetadata schema = new SchemaBuilder()
+            .addRepeatedList("list")
+            .addArray(MinorType.VARCHAR)
+            .resumeSchema()
+            .buildSchema();
+
+    TupleMetadata schema2 = new SchemaBuilder()
+          .addDict("d", MinorType.VARCHAR)
           .nullableValue(MinorType.FLOAT8)
           .resumeSchema()
-        .build();
+          .buildSchema();
 
     assertEquals(1, schema.size());
 
@@ -318,7 +322,6 @@ public class TestSchemaBuilder extends DrillTest {
     assertEquals(MinorType.FLOAT8, valueMetadata.type());
     assertEquals(DataMode.OPTIONAL, valueMetadata.mode());
   }
-  */
 
   /**
    * Test methods to provide a width (precision) for VarChar
