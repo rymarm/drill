@@ -220,10 +220,10 @@ public class TestSchemaParser {
       + ">", schema);
   }
 
-  /* Fix test
+
 
   @Test
-  public void testMap() throws Exception {
+  public void testMap() {
     TupleMetadata schema = new SchemaBuilder()
         .addDict("dict_col_simple", TypeProtos.MinorType.VARCHAR)
           .nullableValue(TypeProtos.MinorType.INT)
@@ -262,7 +262,6 @@ public class TestSchemaParser {
 
     checkSchema("struct_col struct<int_col int, array_col array<int>, nested_struct struct<m1 int, m2 varchar>>", schema);
   }
-   */
 
   @Test
   public void testModeForSimpleType() {
@@ -367,6 +366,5 @@ public class TestSchemaParser {
         assertEquals(expectedMetadata.columnString(), actualMetadata.columnString());
       }
     );
-
   }
 }

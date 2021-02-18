@@ -30,7 +30,9 @@ import org.apache.drill.exec.vector.accessor.ValueType;
 import org.apache.drill.exec.vector.accessor.writer.AbstractObjectWriter;
 import org.apache.drill.exec.vector.accessor.writer.AbstractTupleWriter;
 import org.apache.drill.exec.vector.accessor.writer.ColumnWriterFactory;
+import org.apache.drill.exec.vector.accessor.writer.ObjectDictWriter;
 import org.apache.drill.exec.vector.accessor.writer.MapWriter;
+import org.apache.drill.exec.vector.complex.DictVector;
 import org.apache.drill.test.SubOperatorTest;
 import org.junit.Test;
 
@@ -181,10 +183,6 @@ public class TestDummyWriter extends SubOperatorTest {
   }
 
 
-/*
-
-  Need to be fixed
-
   @Test
   public void testDummyDict() {
 
@@ -233,6 +231,7 @@ public class TestDummyWriter extends SubOperatorTest {
 
     // Nothing is projected
 
+    /*@TODO fix this part of code
     DictWriter dictWriter = rootWriter.dict(dictName);
     assertFalse(dictWriter.isProjected());
     assertFalse(dictWriter.keyWriter().isProjected());
@@ -242,7 +241,7 @@ public class TestDummyWriter extends SubOperatorTest {
     assertFalse(dictWriter1.isProjected());
     assertFalse(dictWriter1.keyWriter().isProjected());
     assertFalse(dictWriter1.valueWriter().scalar().isProjected());
-
+    */
     // Dummy columns seem real.
 
     rootWriter.dict(dictName).keyWriter().setInt(20);
@@ -262,5 +261,5 @@ public class TestDummyWriter extends SubOperatorTest {
     rootWriter.restartRow();
     rootWriter.saveRow();
     rootWriter.endWrite();
-  }*/
+  }
 }

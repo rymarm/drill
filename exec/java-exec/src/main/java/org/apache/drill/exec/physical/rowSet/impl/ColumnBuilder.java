@@ -789,17 +789,6 @@ public class ColumnBuilder {
     ProjectionType projType = outputCol.projectionType();
     ColumnMetadata columnSchema = outputCol.outputSchema();
 
-    /* Add something like that and think about other buildSingleMap, ..
-
-    switch (projType) {
-      case ARRAY:
-      case TUPLE_ARRAY:
-        incompatibleProjection(projType, columnSchema);
-        break;
-      default:
-        break;
-    } */
-
     // Create the dict's offset vector.
 
     DictVector dictVector;
