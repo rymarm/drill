@@ -151,6 +151,8 @@
                  It can be so, for example, after upgrading Hive to 3.0. To check if it's safe to remove the exclusion
                  you can use TestHiveStorage.readFromAlteredPartitionedTableWithEmptyGroupType() test case. -->
                 <exclude>org/apache/parquet/schema/*</exclude>
+                <!-- removed according to MD-6077 -->
+                <exclude>**/Log4j2Plugins.dat</exclude>
               </excludes>
             </filter>
             <filter>
