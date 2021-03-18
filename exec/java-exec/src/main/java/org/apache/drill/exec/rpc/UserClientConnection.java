@@ -17,7 +17,7 @@
  */
 package org.apache.drill.exec.rpc;
 
-import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
 import org.apache.drill.exec.physical.impl.materialize.QueryWritableBatch;
 import org.apache.drill.exec.proto.GeneralRPCProtos.Ack;
 import org.apache.drill.exec.proto.UserBitShared.QueryResult;
@@ -57,10 +57,10 @@ public interface UserClientConnection extends AutoCloseable {
   void sendData(RpcOutcomeListener<Ack> listener, QueryWritableBatch result);
 
   /**
-   * Returns the {@link ChannelFuture} which will be notified when this
+   * Returns the {@link Future} which will be notified when this
    * channel is closed.  This method always returns the same future instance.
    */
-  ChannelFuture getChannelClosureFuture();
+  Future<Void> getClosureFuture();
 
   /**
    * @return Return the client node address.
