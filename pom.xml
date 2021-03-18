@@ -112,6 +112,7 @@
     <libthrift.version>0.13.0</libthrift.version>
     <spring.version>5.0.19.RELEASE</spring.version>
     <xalan.version>2.7.2</xalan.version>
+    <netty.version>4.1.59.Final</netty.version>
   </properties>
 
   <scm>
@@ -934,13 +935,11 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-handler</artifactId>
-      <version>4.0.48.Final</version>
     </dependency>
 
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-common</artifactId>
-      <version>4.0.48.Final</version>
     </dependency>
 
     <dependency>
@@ -1638,6 +1637,16 @@
         <classifier>${netty.tcnative.classifier}</classifier>
         <scope>runtime</scope>
         <optional>true</optional>
+      </dependency>
+      <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-handler</artifactId>
+          <version>${netty.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-common</artifactId>
+          <version>${netty.version}</version>
       </dependency>
       <dependency>
         <groupId>com.tdunning</groupId>
