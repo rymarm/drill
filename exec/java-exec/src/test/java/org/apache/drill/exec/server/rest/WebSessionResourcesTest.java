@@ -17,8 +17,8 @@
  */
 package org.apache.drill.exec.server.rest;
 
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.DefaultChannelPromise;
+import io.netty.util.concurrent.Promise;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -32,7 +32,6 @@ import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -68,15 +67,13 @@ public class WebSessionResourcesTest {
   @Test
   public void testChannelPromiseWithNullExecutor() throws Exception {
     try {
-      ChannelPromise closeFuture = new DefaultChannelPromise(null);
+      Promise<Void> closeFuture = new DefaultPromise(null);
       webSessionResources = new WebSessionResources(mock(BufferAllocator.class), mock(SocketAddress.class), mock
           (UserSession.class), closeFuture);
       webSessionResources.close();
       fail();
     } catch (Exception e) {
       assertTrue(e instanceof NullPointerException);
-      verify(webSessionResources.getAllocator()).close();
-      verify(webSessionResources.getSession()).close();
     }
   }
 
@@ -88,14 +85,12 @@ public class WebSessionResourcesTest {
   public void testChannelPromiseWithValidExecutor() throws Exception {
     try {
       EventExecutor mockExecutor = mock(EventExecutor.class);
-      ChannelPromise closeFuture = new DefaultChannelPromise(null, mockExecutor);
+      Promise<Void> closeFuture = new DefaultPromise(mockExecutor);
       webSessionResources = new WebSessionResources(mock(BufferAllocator.class), mock(SocketAddress.class), mock
           (UserSession.class), closeFuture);
       webSessionResources.close();
       verify(webSessionResources.getAllocator()).close();
       verify(webSessionResources.getSession()).close();
-      verify(mockExecutor).inEventLoop();
-      verify(mockExecutor).execute(any(Runnable.class));
       assertTrue(webSessionResources.getCloseFuture() == null);
       assertTrue(!listenerComplete);
     } catch (Exception e) {
@@ -110,7 +105,7 @@ public class WebSessionResourcesTest {
   @Test
   public void testDoubleClose() throws Exception {
     try {
-      ChannelPromise closeFuture = new DefaultChannelPromise(null, mock(EventExecutor.class));
+      Promise<Void> closeFuture = new DefaultPromise(mock(EventExecutor.class));
       webSessionResources = new WebSessionResources(mock(BufferAllocator.class), mock(SocketAddress.class), mock
           (UserSession.class), closeFuture);
       webSessionResources.close();
@@ -137,7 +132,7 @@ public class WebSessionResourcesTest {
       GenericFutureListener<Future<Void>> closeListener = new TestClosedListener();
       latch = new CountDownLatch(1);
       executor = TransportCheck.createEventLoopGroup(1, "Test-Thread").next();
-      ChannelPromise closeFuture = new DefaultChannelPromise(null, executor);
+      Promise<Void> closeFuture = new DefaultPromise(executor);
 
       // create WebSessionResources with above ChannelPromise to notify listener
       webSessionResources = new WebSessionResources(mock(BufferAllocator.class), mock(SocketAddress.class),

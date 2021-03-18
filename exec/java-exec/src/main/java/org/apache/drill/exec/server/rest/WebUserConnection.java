@@ -24,7 +24,7 @@ import org.apache.drill.shaded.guava.com.google.common.collect.Maps;
 import org.apache.drill.shaded.guava.com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.DrillBuf;
-import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
 import org.apache.drill.common.exceptions.UserException;
 import org.apache.drill.common.types.TypeProtos;
 import org.apache.drill.exec.memory.BufferAllocator;
@@ -51,10 +51,8 @@ import java.util.Set;
  * submitting the query. It provides access to the UserSession executing the query. There is no actual physical
  * channel corresponding to this connection wrapper.
  *
- * It returns a close future with no actual underlying {@link io.netty.channel.Channel} associated with it but do have an
- * EventExecutor out of BitServer EventLoopGroup. Since there is no actual connection established using this class,
- * hence the close event will never be fired by underlying layer and close future is set only when the
- * {@link WebSessionResources} are closed.
+ * It returns a close future which do have an EventExecutor out of BitServer EventLoopGroup.
+ * Close future is set only when the {@link WebSessionResources} are closed.
  */
 
 public class WebUserConnection extends AbstractDisposableUserClientConnection implements ConnectionThrottle {
@@ -167,7 +165,7 @@ public class WebUserConnection extends AbstractDisposableUserClientConnection im
   }
 
   @Override
-  public ChannelFuture getChannelClosureFuture() {
+  public Future<Void> getClosureFuture() {
     return webSessionResources.getCloseFuture();
   }
 
