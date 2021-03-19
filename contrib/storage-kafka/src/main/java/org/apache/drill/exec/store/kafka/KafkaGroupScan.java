@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Properties;
 
 import org.apache.drill.shaded.guava.com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +76,7 @@ public class KafkaGroupScan extends AbstractGroupScan {
   private List<SchemaPath> columns;
   private ListMultimap<Integer, PartitionScanWork> assignments;
   private List<EndpointAffinity> affinities;
+  private Properties propsForConsumer = new Properties();
 
   private Map<TopicPartition, PartitionScanWork> partitionWorkMap;
 
@@ -165,7 +167,17 @@ public class KafkaGroupScan extends AbstractGroupScan {
     List<PartitionInfo> topicPartitions = null;
     String topicName = kafkaScanSpec.getTopicName();
 
-    try (KafkaConsumer<?, ?> kafkaConsumer = new KafkaConsumer<>(kafkaStoragePlugin.getConfig().getKafkaConsumerProps(),
+    kafkaStoragePlugin.getConfig().getKafkaConsumerProps().entrySet().stream()
+      .forEach(entry -> {
+        if(entry.getKey().equals("streams.consumer.default.stream")
+                && topicName.charAt(0)=='/' && topicName.indexOf(':') != -1){
+          propsForConsumer.put(entry.getKey(),topicName.substring(0,topicName.indexOf(':')));
+        }else{
+          propsForConsumer.put(entry.getKey(),entry.getValue());
+        }
+    });
+
+    try (KafkaConsumer<?, ?> kafkaConsumer = new KafkaConsumer<>(propsForConsumer,
         new ByteArrayDeserializer(), new ByteArrayDeserializer())) {
       if (!kafkaConsumer.listTopics().keySet().contains(topicName)) {
         throw UserException.dataReadError()
