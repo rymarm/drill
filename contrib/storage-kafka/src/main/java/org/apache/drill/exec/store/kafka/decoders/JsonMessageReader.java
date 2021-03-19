@@ -24,6 +24,7 @@ import static org.apache.drill.exec.store.kafka.MetaDataField.KAFKA_TIMESTAMP;
 import static org.apache.drill.exec.store.kafka.MetaDataField.KAFKA_TOPIC;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.drill.common.exceptions.UserException;
@@ -76,6 +77,10 @@ public class JsonMessageReader implements MessageReader {
       jsonObj.addProperty(KAFKA_OFFSET.getFieldName(), record.offset());
       jsonObj.addProperty(KAFKA_TIMESTAMP.getFieldName(), record.timestamp());
       jsonObj.addProperty(KAFKA_MSG_KEY.getFieldName(), record.key() != null ? record.key().toString() : null);
+      if (record.headers() != null) {
+        Arrays.stream(record.headers().toArray())
+            .forEach(x -> jsonObj.addProperty(x.key(), new String(x.value(), Charsets.UTF_8)));
+      }
       jsonReader.setSource(jsonObj.toString().getBytes(Charsets.UTF_8));
       jsonReader.write(writer);
     } catch (IOException e) {
