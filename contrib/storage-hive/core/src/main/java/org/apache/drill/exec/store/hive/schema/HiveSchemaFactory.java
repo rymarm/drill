@@ -190,6 +190,11 @@ public class HiveSchemaFactory extends AbstractSchemaFactory {
     }
 
     @Override
+    public boolean contentsHaveChangedSince(long lastCheck, long now) {
+      return false;
+    }
+
+    @Override
     public org.apache.calcite.schema.Table getTable(String name) {
       if (defaultSchema == null) {
         return super.getTable(name);
