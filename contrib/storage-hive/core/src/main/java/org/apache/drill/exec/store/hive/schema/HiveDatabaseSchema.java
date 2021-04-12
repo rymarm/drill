@@ -70,11 +70,6 @@ public class HiveDatabaseSchema extends AbstractSchema {
     return tables.keySet();
   }
 
-  @Override
-  public boolean contentsHaveChangedSince(long lastCheck, long now) {
-    return false;
-  }
-
   private void ensureInitTables() {
     if (tables == null) {
       try {
