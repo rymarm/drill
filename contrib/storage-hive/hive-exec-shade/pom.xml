@@ -31,20 +31,6 @@
   <packaging>jar</packaging>
   <name>contrib/hive-storage-plugin/hive-exec-shaded</name>
 
-  <properties>
-    <hive.parquet.version>1.8.3</hive.parquet.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.apache.parquet</groupId>
-        <artifactId>parquet-hadoop-bundle</artifactId>
-        <version>${hive.parquet.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.apache.hive</groupId>
@@ -132,7 +118,6 @@
           <artifactSet>
             <includes>
               <include>org.apache.hive:hive-exec</include>
-              <include>org.apache.parquet:parquet-hadoop-bundle</include>
               <include>commons-codec:commons-codec</include>
               <include>com.fasterxml.jackson.core:jackson-databind</include>
               <include>com.fasterxml.jackson.core:jackson-annotations</include>
@@ -191,10 +176,6 @@
             <filter>
               <artifact>org.apache.hive:hive-exec</artifact>
               <excludes>
-                <!-- This exclusion can be removed once hive-exec uses parquet-hadoop-bundle 1.8.2 or higher.
-                 It can be so, for example, after upgrading Hive to 3.0. To check if it's safe to remove the exclusion
-                 you can use TestHiveStorage.readFromAlteredPartitionedTableWithEmptyGroupType() test case. -->
-                <exclude>org/apache/parquet/schema/*</exclude>
                 <!-- removed because calcite in drill is older then calcite in hive and it causes problems -->
                 <exclude>org/apache/calcite/**</exclude>
                 <!-- removed according to MD-6077 -->
