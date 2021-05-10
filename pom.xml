@@ -2749,8 +2749,8 @@
       <id>mapr</id>
       <properties>
         <alt-hadoop>mapr</alt-hadoop>
-        <hive.version>2.3.6-mapr-SNAPSHOT</hive.version>
-        <hbase.version>1.1.13.0-mapr-SNAPSHOT</hbase.version>
+        <hive.version>2.3.6-mapr-2104</hive.version>
+        <hbase.version>1.1.13.300-mapr-634</hbase.version>
         <hadoop.version>2.7.0-mapr-1808</hadoop.version>
         <zookeeper.version>3.4.11-mapr-1808</zookeeper.version>
         <curator.test.version>2.13.0</curator.test.version>
