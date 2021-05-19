@@ -193,16 +193,25 @@ public abstract class HiveAbstractReader extends AbstractRecordReader {
         }
         selectedPartitionNames = partitionNames;
       } else {
-        selectedColumnNames = Lists.newArrayList();
-        for (SchemaPath field : getColumns()) {
-          String columnName = field.getRootSegment().getPath();
-          if (partitionNames.contains(columnName)) {
-            selectedPartitionNames.add(columnName);
-          } else {
-            columnIds.add(tableColumnNames.indexOf(columnName));
-            selectedColumnNames.add(columnName);
+        List<String> paths = getColumns().stream()
+                .map(SchemaPath::getRootSegmentPath)
+                .collect(Collectors.toList());
+
+        partitionNames.forEach(partitionName -> {
+          for (int index = 0; index < paths.size(); index++) {
+            if (partitionName.equals(paths.get(index))) {
+              selectedPartitionNames.add(partitionName);
+              paths.remove(index);
+              break;
+            }
           }
-        }
+        });
+
+        selectedColumnNames = Lists.newArrayList();
+        paths.forEach(columnName -> {
+          columnIds.add(tableColumnNames.indexOf(columnName));
+          selectedColumnNames.add(columnName);
+        });
       }
       List<String> paths = getColumns().stream()
           .map(SchemaPath::getRootSegmentPath)
