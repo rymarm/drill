@@ -2865,7 +2865,7 @@
         <alt-hadoop>mapr</alt-hadoop>
         <hive.version>2.3.8-mapr-SNAPSHOT</hive.version>
         <hbase.version>1.4.13.0-mapr-SNAPSHOT</hbase.version>
-        <hadoop.version>2.7.6.0-mapr-800-SNAPSHOT</hadoop.version>
+        <hadoop.version>2.7.6.0-mapr-720-SNAPSHOT</hadoop.version>
         <zookeeper.version>3.5.6.0-mapr-2009</zookeeper.version>
         <guava.version>28.2-jre</guava.version>
       </properties>
