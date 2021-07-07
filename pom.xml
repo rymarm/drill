@@ -113,6 +113,7 @@
     <spring.version>5.0.19.RELEASE</spring.version>
     <xalan.version>2.7.2</xalan.version>
     <netty.version>4.1.59.Final</netty.version>
+    <commons.codec.version>1.15</commons.codec.version>
   </properties>
 
   <scm>
@@ -929,7 +930,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.10</version>
+      <version>${commons.codec.version}</version>
     </dependency>
 
     <dependency>
