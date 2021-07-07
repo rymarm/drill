@@ -116,7 +116,7 @@
     <snakeyaml.version>1.26</snakeyaml.version>
     <commons.lang3.version>3.10</commons.lang3.version>
     <typesafe.config.version>1.0.0</typesafe.config.version>
-    <commons.codec.version>1.14</commons.codec.version>
+    <commons.codec.version>1.15</commons.codec.version>
     <metadata.extractor.version>2.15.0</metadata.extractor.version>
     <xalan.version>2.7.2</xalan.version>
     <xerces.version>2.12.0</xerces.version>
