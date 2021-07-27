@@ -114,6 +114,7 @@
     <xalan.version>2.7.2</xalan.version>
     <netty.version>4.1.59.Final</netty.version>
     <commons.codec.version>1.15</commons.codec.version>
+    <httpclient.version>4.5.13</httpclient.version>
   </properties>
 
   <scm>
@@ -1917,6 +1918,11 @@
         <groupId>xalan</groupId>
         <artifactId>xalan</artifactId>
         <version>${xalan.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpclient.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
