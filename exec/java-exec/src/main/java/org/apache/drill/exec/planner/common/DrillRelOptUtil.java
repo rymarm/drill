@@ -49,6 +49,7 @@ import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.rex.RexFieldAccess;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.rex.RexVisitor;
 import org.apache.calcite.rex.RexVisitorImpl;
@@ -562,6 +563,13 @@ public abstract class DrillRelOptUtil {
         }
       }
       return null;
+    }
+
+    @Override
+    public PathSegment visitFieldAccess(RexFieldAccess fieldAccess) {
+      PathSegment refPath = fieldAccess.getReferenceExpr().accept(this);
+      PathSegment.NameSegment fieldPath = new PathSegment.NameSegment(fieldAccess.getField().getName());
+      return refPath.cloneWithNewChild(fieldPath);
     }
 
     private void addDesiredField(String name, RelDataType type, RexNode originalNode) {
