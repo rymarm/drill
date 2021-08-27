@@ -19,6 +19,7 @@ package org.apache.drill.exec.record.metadata.schema.parser;
 
 import org.apache.drill.common.types.TypeProtos;
 import org.apache.drill.exec.record.metadata.ColumnMetadata;
+import org.apache.drill.exec.record.metadata.DictColumnMetadata;
 import org.apache.drill.exec.record.metadata.SchemaBuilder;
 import org.apache.drill.exec.record.metadata.TupleMetadata;
 import org.joda.time.LocalDate;
@@ -220,8 +221,6 @@ public class TestSchemaParser {
       + ">", schema);
   }
 
-
-
   @Test
   public void testMap() {
     TupleMetadata schema = new SchemaBuilder()
@@ -260,7 +259,11 @@ public class TestSchemaParser {
         .resumeSchema()
       .buildSchema();
 
-    checkSchema("struct_col struct<int_col int, array_col array<int>, nested_struct struct<m1 int, m2 varchar>>", schema);
+    checkSchema("dict_col_simple map<varchar, int>"
+      + ", dict_col_simple_ps map<varchar(50), decimal(10, 2) not null>"
+      + ", dict_col_struct map<int, struct<sb boolean not null, si int>>"
+      + ", dict_col_dict map<varchar, map<int, boolean>>"
+      + ", dict_col_array map<bigint, array<map<date, double>>>", schema);
   }
 
   @Test
@@ -284,9 +287,10 @@ public class TestSchemaParser {
 
   @Test
   public void testModeForRepeatedType() {
-    TupleMetadata schema = SchemaExprParser.parseSchema(
-      "a array<int>, aa array<array<int>>, ma array<struct<m1 int not null, m2 varchar>>");
-
+    TupleMetadata schema = SchemaExprParser.parseSchema("a array<int>"
+            + ", aa array<array<int>>"
+            + ", sa array<struct<s1 int not null, s2 varchar>>"
+            + ", ma array<map<varchar, array<int>>>");
     assertTrue(schema.metadata("a").isArray());
 
     ColumnMetadata nestedArray = schema.metadata("aa");
@@ -302,10 +306,10 @@ public class TestSchemaParser {
 
     ColumnMetadata mapArray = schema.metadata("ma");
     assertTrue(mapArray.isArray());
-    assertTrue(mapArray.isMap());
-    TupleMetadata mapSchema = mapArray.tupleSchema();
-    assertFalse(mapSchema.metadata("m1").isNullable());
-    assertTrue(mapSchema.metadata("m2").isNullable());
+    assertTrue(mapArray.isDict());
+    DictColumnMetadata dictMetadata = (DictColumnMetadata) mapArray;
+    assertFalse(dictMetadata.keyColumnMetadata().isNullable());
+    assertTrue(dictMetadata.valueColumnMetadata().isArray());
   }
 
   @Test
