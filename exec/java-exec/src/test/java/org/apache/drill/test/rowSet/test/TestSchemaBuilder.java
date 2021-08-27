@@ -290,15 +290,9 @@ public class TestSchemaBuilder extends DrillTest {
   public void testDictInRow() {
 
     TupleMetadata schema = new SchemaBuilder()
-            .addRepeatedList("list")
-            .addArray(MinorType.VARCHAR)
-            .resumeSchema()
-            .buildSchema();
-
-    TupleMetadata schema2 = new SchemaBuilder()
           .addDict("d", MinorType.VARCHAR)
-          .nullableValue(MinorType.FLOAT8)
-          .resumeSchema()
+            .nullableValue(MinorType.FLOAT8)
+            .resumeSchema()
           .buildSchema();
 
     assertEquals(1, schema.size());

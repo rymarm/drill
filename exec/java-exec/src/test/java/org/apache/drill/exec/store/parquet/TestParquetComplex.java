@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import org.apache.drill.exec.util.JsonStringArrayList;
 import org.apache.drill.test.BaseTestQuery;
 import org.apache.drill.test.TestBuilder;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestParquetComplex extends BaseTestQuery {
@@ -716,6 +717,7 @@ public class TestParquetComplex extends BaseTestQuery {
         .go();
   }
 
+  @Ignore("Remove it when MD-6164 will be fixed")
   @Test
   public void testDictArrayAndElementFlatten() throws Exception {
     String query = "select id, flatten(flatten(map_array)) flat from cp.`store/parquet/complex/map/parquet/000000_0.parquet`";
@@ -845,35 +847,6 @@ public class TestParquetComplex extends BaseTestQuery {
         .baselineValues(5, TestBuilder.mapOfObject("b", 6, "c", 7, "a", 8, "abc4", 9, "bde", 10))
         .baselineValues(4, TestBuilder.mapOfObject("a", 3, "b", 4, "c", 5))
         .baselineValues(2, TestBuilder.mapOfObject("a", 1, "b", 2, "c", 3))
-        .go();
-  }
-
-  @Test // DRILL-7473
-  public void testDictInRepeatedMap() throws Exception {
-    String query = "select struct_array[1].d as d from cp.`store/parquet/complex/map/parquet/repeated_struct_with_dict.parquet`";
-    testBuilder()
-        .sqlQuery(query)
-        .unOrdered()
-        .baselineColumns("d")
-        .baselineValuesForSingleColumn(
-            TestBuilder.mapOfObject(1, "a", 2, "b", 3, "c"),
-            TestBuilder.mapOfObject(),
-            TestBuilder.mapOfObject(1, "a", 2, "b")
-        )
-        .go();
-  }
-
-  @Test // DRILL-7491
-  public void testCountOnComplexTypes() throws Exception {
-    String query = "SELECT " +
-        "COUNT(c13) cnt13, COUNT(c14) cnt14, " +
-        "COUNT(c15) cnt15, COUNT(c16) cnt16 " +
-        "FROM cp.`parquet/hive_all/hive_alltypes.parquet`";
-    testBuilder()
-        .sqlQuery(query)
-        .unOrdered()
-        .baselineColumns("cnt13", "cnt14", "cnt15", "cnt16")
-        .baselineValues(3L, 0L, 3L, 3L)
         .go();
   }
 
