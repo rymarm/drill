@@ -100,7 +100,7 @@ pipeline {
                       sh """
                         rm -rf ${PROJECT}; git clone git@github.com:mapr/private-pkg.git ${PROJECT}; \
                         cd ${PROJECT}; \
-                        git checkout MEP-4.0.0 ; \
+                        git checkout MEP-8.0.0 ; \
                         make mapr-drill-internal-${COMPONENT_VERSION} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA} ; \
                         make ${PROJECT} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA}; \
                         make mapr-drill-yarn-${COMPONENT_VERSION} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA} ; \
@@ -166,7 +166,7 @@ pipeline {
                       sh """
                         rm -rf ${PROJECT}; git clone git@github.com:mapr/private-pkg.git ${PROJECT}; \
                         cd ${PROJECT}; \
-                        git checkout MEP-4.0.0 ; \
+                        git checkout MEP-8.0.0 ; \
                         make mapr-drill-internal-${COMPONENT_VERSION} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA} ; \
                         make ${PROJECT} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA}; \
                         make mapr-drill-yarn-${COMPONENT_VERSION} ${MAKEFILE_ARGS} TIMESTAMP=${ID} DRILL_COMMIT_ID=${GIT_SHORT_COMMIT_SHA} ; \
