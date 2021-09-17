@@ -23,7 +23,7 @@
   <parent>
     <artifactId>exec-parent</artifactId>
     <groupId>org.apache.drill.exec</groupId>
-    <version>1.16.1.200-eep-SNAPSHOT</version>
+    <version>1.16.1.300-eep-800</version>
   </parent>
   <artifactId>drill-java-exec</artifactId>
   <name>exec/Java Execution Engine</name>
