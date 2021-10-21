@@ -29,6 +29,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 import java.io.Closeable;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -243,6 +244,7 @@ public abstract class RpcBus<T extends EnumLite, C extends RemoteConnection> imp
   protected class InboundHandler extends MessageToMessageDecoder<InboundRpcMessage> {
 
     private final C connection;
+    private List<PongListener> pongListeners = new ArrayList<>();
 
     public InboundHandler(C connection) {
       super();
@@ -318,7 +320,8 @@ public abstract class RpcBus<T extends EnumLite, C extends RemoteConnection> imp
           break;
 
         case PONG:
-          // noop.
+          pongListeners.forEach(listener -> listener.update());
+          pongListeners.clear();
           break;
 
         default:
@@ -334,6 +337,17 @@ public abstract class RpcBus<T extends EnumLite, C extends RemoteConnection> imp
         }
         msg.release();
       }
+    }
+
+    /**
+     * Add listener to be notified if handler receive {@link org.apache.drill.exec.rpc.InboundRpcMessage} with
+     * {@link org.apache.drill.exec.proto.GeneralRPCProtos.RpcMode#PONG PONG} mode. Listener is notified only
+     * once. To be notified about next message it is need to re-add the listener.
+     *
+     * @param listener listener which should be notified.
+     */
+    void subscribeForPongMessage(PongListener listener) {
+      pongListeners.add(listener);
     }
   }
 

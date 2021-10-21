@@ -17,6 +17,7 @@
  */
 package org.apache.drill.exec.rpc;
 
+import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.shaded.guava.com.google.common.base.Preconditions;
 import com.google.protobuf.Internal.EnumLite;
 import com.google.protobuf.MessageLite;
@@ -72,6 +73,7 @@ public abstract class BasicClient<T extends EnumLite, CC extends ClientConnectio
   private final Parser<HR> handshakeParser;
 
   private final IdlePingHandler pingHandler;
+  private InboundHandler messageHandler;
   private ConnectionMultiListener.SSLHandshakeListener sslHandshakeListener = null;
 
   // Determines if authentication is completed between client and server
@@ -121,7 +123,8 @@ public abstract class BasicClient<T extends EnumLite, CC extends ClientConnectio
               pipe.addLast(RpcConstants.IDLE_STATE_HANDLER, pingHandler);
             }
 
-            pipe.addLast(RpcConstants.MESSAGE_HANDLER, new InboundHandler(connection));
+            messageHandler = new InboundHandler(connection);
+            pipe.addLast(RpcConstants.MESSAGE_HANDLER, messageHandler);
             pipe.addLast(RpcConstants.EXCEPTION_HANDLER, new RpcExceptionHandler<>(connection));
           }
         }); //
@@ -322,6 +325,22 @@ public abstract class BasicClient<T extends EnumLite, CC extends ClientConnectio
 
   public void setAutoRead(boolean enableAutoRead) {
     connection.setAutoRead(enableAutoRead);
+  }
+
+  /**
+   * Send {@link RpcMode#PING PING} message and waits for {@link RpcMode#PONG PONG} answer to verify connection.
+   *
+   * @param timeout time in seconds to wait message receiving. Should be higher than 0
+   * @return true if {@link RpcMode#PONG PONG} received until timeout, false otherwise
+   * @throws DrillRuntimeException if the value supplied for timeout is less than 0
+   */
+  public boolean ping(int timeout) throws DrillRuntimeException {
+    connection.getChannel()
+            .writeAndFlush(PING_MESSAGE);
+    PongListener pongListener = new PongListener();
+    messageHandler.subscribeForPongMessage(pongListener);
+
+    return pongListener.pongIsReceived(timeout);
   }
 
   public void close() {

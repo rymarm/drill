@@ -540,8 +540,12 @@ public class DrillConnectionImpl extends AvaticaConnection
 
   @Override
   public boolean isValid(int timeout) throws SQLException {
-    checkOpen();
-    return super.isValid(timeout);
+    if (timeout < 0) {
+      throw new SQLException(String.format("Invalid timeout (%d<0).", timeout));
+    }
+    return !isClosed()
+      && client.connectionIsActive()
+      && client.ping(timeout);
   }
 
   @Override

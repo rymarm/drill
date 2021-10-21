@@ -40,6 +40,7 @@ import org.apache.drill.common.DrillAutoCloseables;
 import org.apache.drill.common.Version;
 import org.apache.drill.common.config.DrillConfig;
 import org.apache.drill.common.config.DrillProperties;
+import org.apache.drill.common.exceptions.DrillRuntimeException;
 import org.apache.drill.common.exceptions.UserException;
 import org.apache.drill.exec.ExecConstants;
 import org.apache.drill.exec.coord.ClusterCoordinator;
@@ -49,6 +50,7 @@ import org.apache.drill.exec.memory.BufferAllocator;
 import org.apache.drill.exec.memory.RootAllocatorFactory;
 import org.apache.drill.exec.proto.BitControl.PlanFragment;
 import org.apache.drill.exec.proto.CoordinationProtos.DrillbitEndpoint;
+import org.apache.drill.exec.proto.GeneralRPCProtos;
 import org.apache.drill.exec.proto.GeneralRPCProtos.Ack;
 import org.apache.drill.exec.proto.UserBitShared;
 import org.apache.drill.exec.proto.UserBitShared.QueryId;
@@ -819,6 +821,24 @@ public class DrillClient implements Closeable, ConnectionThrottle {
    */
   public void runQuery(QueryType type, String plan, UserResultsListener resultsListener) {
     client.submitQuery(resultsListener, newBuilder().setResultsMode(STREAM_FULL).setType(type).setPlan(plan).build());
+  }
+
+  /**
+   * @return true if client has connection and it is connected, false otherwise
+   */
+  public boolean connectionIsActive() {
+    return client.isActive();
+  }
+
+  /**
+   * Verify connection with ping-pong message.
+   *
+   * @param timeout time in seconds to wait message receiving. Should be higher than 0
+   * @return true if {@link GeneralRPCProtos.RpcMode#PONG PONG} received until timeout, false otherwise
+   * @throws DrillRuntimeException if the value supplied for timeout is less than 0
+   */
+  public boolean ping(int timeout) throws DrillRuntimeException {
+    return client.ping(timeout);
   }
 
   private class ListHoldingResultsListener implements UserResultsListener {
