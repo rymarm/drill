@@ -23,7 +23,7 @@
   <parent>
     <artifactId>drill-root</artifactId>
     <groupId>org.apache.drill</groupId>
-    <version>1.16.0.300-mapr-635</version>
+    <version>1.16.0.301-mapr-635</version>
   </parent>
   <artifactId>drill-client</artifactId>
   <name>Apache Drill Client</name>
