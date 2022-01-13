@@ -23,7 +23,7 @@
   <parent>
     <artifactId>memory-parent</artifactId>
     <groupId>org.apache.drill.memory</groupId>
-    <version>1.16.0.301-mapr-635</version>
+    <version>1.16.0.302-mapr-635</version>
   </parent>
   <artifactId>drill-memory-base</artifactId>
   <name>exec/memory/base</name>

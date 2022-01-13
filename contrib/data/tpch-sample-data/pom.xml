@@ -24,7 +24,7 @@
   <parent>
     <artifactId>drill-contrib-data-parent</artifactId>
     <groupId>org.apache.drill.contrib.data</groupId>
-    <version>1.16.0.301-mapr-635</version>
+    <version>1.16.0.302-mapr-635</version>
   </parent>
 
   <artifactId>tpch-sample-data</artifactId>
