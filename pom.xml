@@ -1664,6 +1664,11 @@
         <version>${janino.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.codehaus.janino</groupId>
+        <artifactId>commons-compiler</artifactId>
+        <version>${janino.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.honton.chas.hocon</groupId>
         <artifactId>jackson-dataformat-hocon</artifactId>
         <version>1.1.1</version>
