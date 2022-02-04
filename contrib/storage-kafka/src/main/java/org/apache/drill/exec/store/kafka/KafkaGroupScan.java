@@ -182,7 +182,7 @@ public class KafkaGroupScan extends AbstractGroupScan {
       // evaluates lazily, seeking to the first/last offset in all partitions only
       // when poll(long) or
       // position(TopicPartition) are called
-      kafkaConsumer.poll(0);
+      kafkaConsumer.poll(1);
       Set<TopicPartition> assignments = kafkaConsumer.assignment();
       topicPartitions = kafkaConsumer.partitionsFor(topicName);
 
